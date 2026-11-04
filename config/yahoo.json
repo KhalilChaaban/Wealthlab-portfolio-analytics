@@ -1,0 +1,46 @@
+{
+  "research": {
+    "source": "yahoo",
+    "start": "2015-01-01",
+    "end": "2026-01-01",
+    "weights": {
+      "SPY": 0.28,
+      "VEA": 0.12,
+      "VWO": 0.08,
+      "AGG": 0.25,
+      "TIP": 0.1,
+      "GLD": 0.07,
+      "VNQ": 0.05,
+      "BIL": 0.05
+    },
+    "benchmark": {
+      "SPY": 0.6,
+      "AGG": 0.4
+    },
+    "initial_capital": 1000000,
+    "trading_cost_bps": 5,
+    "advisory_fee_annual": 0.005,
+    "rebalance": "monthly",
+    "annual_risk_free_rate": 0.025,
+    "risk_free_source": "constant",
+    "periods_per_year": 252,
+    "min_observations": 253,
+    "max_calendar_gap_days": 7,
+    "seed": 42
+  },
+  "client": {
+    "label": "Illustrative family mandate",
+    "current_wealth": 2000000,
+    "annual_spending_today": 72000,
+    "horizon_years": 20,
+    "inflation": 0.025,
+    "expected_annual_return": 0.06,
+    "annual_volatility": 0.12,
+    "legacy_goal_today": 500000,
+    "paths": 5000,
+    "seed": 2026,
+    "one_off_spending": {
+      "24": 250000
+    }
+  }
+}

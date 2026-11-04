@@ -1,0 +1,12 @@
+{
+  "input_rows": 2766,
+  "retained_rows": 2766,
+  "identical_duplicates_removed": 0,
+  "rows_outside_common_range": 0,
+  "first_observation": "2015-01-02",
+  "last_observation": "2025-12-31",
+  "largest_calendar_gap_days": 4,
+  "absolute_daily_moves_above_20pct": 0,
+  "price_policy": "adjusted total-return proxy; no filling or clipping",
+  "calendar_limit": "No exchange-calendar completeness guarantee; gap checks are heuristic."
+}

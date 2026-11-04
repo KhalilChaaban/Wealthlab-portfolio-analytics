@@ -1,0 +1,4 @@
+-r requirements.txt
+# Optional provider adapters. Run integration checks after upgrading these.
+yfinance>=0.2.54,<2
+requests>=2.32,<3

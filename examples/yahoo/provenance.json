@@ -1,0 +1,83 @@
+{
+  "source": "Yahoo Finance; preserved results from the user-executed Colab notebook",
+  "synthetic_market_data": false,
+  "source_notebook_sha256": "ad63f97284987a34dc2a708a820ff96c93348d7af2d210ddb9826ffcc4f352d8",
+  "source_notebook_encoding": "utf-16",
+  "output_notebook_encoding": "utf-8",
+  "source_price_csv_sha256_recorded_in_notebook": "580d50b4762e6e106ba863b1729896b3e927336ccfc1248231d6927958ef643f",
+  "provider_recorded_in_notebook": "Yahoo Finance via yfinance 0.2.66; personal research use",
+  "quality": {
+    "input_rows": 2766,
+    "retained_rows": 2766,
+    "identical_duplicates_removed": 0,
+    "rows_outside_common_range": 0,
+    "first_observation": "2015-01-02",
+    "last_observation": "2025-12-31",
+    "largest_calendar_gap_days": 4,
+    "absolute_daily_moves_above_20pct": 0,
+    "price_policy": "adjusted total-return proxy; no filling or clipping",
+    "calendar_limit": "No exchange-calendar completeness guarantee; gap checks are heuristic."
+  },
+  "research_config": {
+    "source": "yahoo",
+    "start": "2015-01-01",
+    "end": "2026-01-01",
+    "weights": {
+      "SPY": 0.28,
+      "VEA": 0.12,
+      "VWO": 0.08,
+      "AGG": 0.25,
+      "TIP": 0.1,
+      "GLD": 0.07,
+      "VNQ": 0.05,
+      "BIL": 0.05
+    },
+    "benchmark": {
+      "SPY": 0.6,
+      "AGG": 0.4
+    },
+    "initial_capital": 1000000,
+    "trading_cost_bps": 5,
+    "advisory_fee_annual": 0.005,
+    "rebalance": "monthly",
+    "annual_risk_free_rate": 0.025,
+    "risk_free_source": "constant",
+    "periods_per_year": 252,
+    "min_observations": 253,
+    "max_calendar_gap_days": 7,
+    "seed": 42
+  },
+  "client_assumptions": {
+    "label": "Illustrative family mandate",
+    "current_wealth": 2000000,
+    "annual_spending_today": 72000,
+    "horizon_years": 20,
+    "inflation": 0.025,
+    "expected_annual_return": 0.06,
+    "annual_volatility": 0.12,
+    "legacy_goal_today": 500000,
+    "paths": 5000,
+    "seed": 2026,
+    "one_off_spending": {
+      "24": 250000
+    }
+  },
+  "precision": "Metrics/risk: saved four-decimal DataFrames; attribution/stress: saved six-decimal display; NAV supplemented from Colab metadata.",
+  "daily_price_cache_included": false,
+  "independent_new_yahoo_download_performed": false,
+  "limitation": "Raw daily prices and the original run ZIP were not attached. Historical charts and summaries are preserved, not reconstructed. Rerun the Yahoo-configured notebook to obtain full daily CSV exports.",
+  "attribution_reconciliation_residual_usd": 3.5999808460474014e-05,
+  "planning": {
+    "success_frequency": 0.6568,
+    "spending_funded_frequency": 0.8932,
+    "simulation_recalculated_from_saved_assumptions": true
+  },
+  "figure_sha256": {
+    "01_portfolio_overview.png": "523d9d0c7a052147bba3d76f55bbf617dacdcf7a64eb97145223925366367180",
+    "02_risk_diagnostics.png": "1afe5fb429cde14b3ef1bc7e51fc604ea3627eace4a9d712a517122770e66cac",
+    "03_attribution_and_weights.png": "d2c73ef99174cd39274ea69c065dde280c211e44b35f8223b7148e8e8a386968",
+    "04_client_projection.png": "7564d834c2cd184d817feed546af7ef3953f9638e3c72a244bfa5c6e97b052c4",
+    "05_sensitivity_and_stress.png": "a05dddc2f588942ec88b2a327893256fe33f8d581ffa2bb3c12b3b052ce85239"
+  },
+  "source_test_output": "st_one_off_spending_is_applied_once) ... ok\ntest_random_seed_is_reproducible (test_planning.PlanningTests.test_random_seed_is_reproducible) ... ok\ntest_real_wealth_deflates_nominal_balance (test_planning.PlanningTests.test_real_wealth_deflates_nominal_balance) ... ok\ntest_zero_return_cashflow_has_exact_solution (test_planning.PlanningTests.test_zero_return_cashflow_has_exact_solution) ... ok\ntest_zero_volatility_growth_matches_expected_annual_return (test_planning.PlanningTests.test_zero_volatility_growth_matches_expected_annual_return) ... ok\n\n----------------------------------------------------------------------\nRan 38 tests in 5.032s\n\nOK\n\n"
+}
