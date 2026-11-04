@@ -72,13 +72,25 @@ discussion used demonstration numbers, so it needed to be replaced when the
 Yahoo results became the final case. Getting the charts, tables, and discussion
 to describe the same run was part of finishing the project.
 
-## Contributions and next learning step
+## Contributions
 
 AI supported the implementation, tests, documentation, and repository setup. My
 involvement included running the project in Colab, choosing to use real Yahoo
 data, and working through the outputs with guidance. This reflection uses my
 stated motivation and selected challenges, with AI assistance in editing.
 
-My next learning step is to become more confident checking calculations and
-explaining the results independently. An Excel reconciliation or a small change
-to the model would give me something concrete to work through.
+## What I want to investigate next
+
+I want to make the data checks more specific by comparing the dates in the price
+history with the expected exchange sessions. I'd also like a report showing
+each check's result, threshold, status, and evidence. That would help me follow
+why a check passed or failed and decide what needs attention.
+
+I'm also curious about how much the rebalancing rule affects the results. I'd
+like to compare monthly, quarterly, and buy-and-hold policies across different
+historical periods, using the same starting allocation and cost assumptions.
+It seems like a useful way to question whether a conclusion holds beyond one
+rule or one period, and to give myself more practice explaining the results.
+
+These are planned extensions. They have not been implemented or evaluated in
+the current case.

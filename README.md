@@ -32,6 +32,15 @@ describes those experiences and what I still want to learn.
 The [research notes](docs/RESEARCH_NOTES.md) explain the modeling choices and
 which follow-up questions remain unanswered.
 
+For the next version, I want to investigate two additions:
+
+- Check for missing exchange sessions and report each check's result, threshold,
+  status, and supporting evidence.
+- Compare monthly, quarterly, and buy-and-hold policies across different
+  historical periods using consistent inputs and cost assumptions.
+
+These are planned extensions; the current findings do not include their results.
+
 ![Yahoo Finance portfolio dashboard](docs/images/portfolio_overview.png)
 
 > **Finalized Yahoo Finance case:** real adjusted-price observations from
