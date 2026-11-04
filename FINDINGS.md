@@ -1,5 +1,8 @@
 ## Findings and Conclusions
 
+For the personal context behind the project, see the [project reflection](docs/PERSONAL_REFLECTION.md).
+The [research notes](docs/RESEARCH_NOTES.md) explain the assumptions and follow-up questions.
+
 ### What this project looked at
 
 This project explored how a diversified portfolio performed, where its risk came from, and how an investment plan might support a client's spending goals.

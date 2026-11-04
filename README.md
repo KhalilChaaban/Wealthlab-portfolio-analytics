@@ -2,14 +2,35 @@
 
 **Multi-Asset Portfolio Analytics & Client Wealth Planning**
 
-[Open in Google Colab](https://colab.research.google.com/github/KhalilChaaban/Wealthlab-portfolio-analytics/blob/main/WealthLab_Colab.ipynb) · [Findings](FINDINGS.md) · [Validation](docs/VALIDATION.md)
+[Open in Google Colab](https://colab.research.google.com/github/KhalilChaaban/Wealthlab-portfolio-analytics/blob/main/WealthLab_Colab.ipynb) · [Findings](FINDINGS.md) · [Project reflection](docs/PERSONAL_REFLECTION.md) · [Research choices](docs/RESEARCH_NOTES.md)
 
 Personal learning and research project developed with AI assistance.
 
-A complete Google Colab and Python research project for private banking,
-wealth management, and portfolio analytics. It combines self-financing portfolio
-accounting, performance attribution, risk diagnostics, and an illustrative client
-spending plan in an offline HTML report.
+This project compares an eight-ETF portfolio with a 60/40 benchmark and explores
+how fees, risk, and client spending assumptions affect the results. It uses
+Python and Google Colab, with a saved report that can be opened offline.
+
+## Why I started this project
+
+I started WealthLab to build my understanding of portfolio analysis, private
+banking, and financial risk. I want to understand how portfolios respond to
+changing market conditions and make more informed financial decisions. I'm also
+interested in the assumptions behind the numbers and how bias can affect the
+way results are interpreted.
+
+I chose to use AI to support the coding and documentation so I could get early
+experience of combining financial analysis with technology as a student. My
+involvement included running the project in Colab, choosing Yahoo data, and
+working through the outputs with guidance.
+
+The challenges I worked through included learning the Colab workflow, working
+with real market data, interpreting the return and risk trade-off, following
+financial calculations, separating history from simulation, and keeping the
+report consistent after the data source changed. The [project reflection](docs/PERSONAL_REFLECTION.md)
+describes those experiences and what I still want to learn.
+
+The [research notes](docs/RESEARCH_NOTES.md) explain the modeling choices and
+which follow-up questions remain unanswered.
 
 ![Yahoo Finance portfolio dashboard](docs/images/portfolio_overview.png)
 
@@ -123,6 +144,8 @@ flowchart TD
 | `WealthLab_Colab.ipynb` | Complete standalone notebook, including all module source |
 | `START_HERE.html` | Simple entry page for the completed case |
 | `FINDINGS.md` | Discussion of the saved Yahoo results |
+| `docs/PERSONAL_REFLECTION.md` | Motivation, approach, and challenges worked through with guidance |
+| `docs/RESEARCH_NOTES.md` | Modeling choices, interpretation, and open questions |
 | `wealthlab/config.py` | Validated research and client assumptions |
 | `wealthlab/data.py` | Synthetic generator, Yahoo/FRED adapters, caching, quality checks |
 | `wealthlab/portfolio.py` | Holdings, rebalancing, transaction costs, and fees |
