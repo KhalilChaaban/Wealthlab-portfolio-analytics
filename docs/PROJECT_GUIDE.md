@@ -24,15 +24,16 @@ Historical results do not automatically become forward return assumptions.
 The finalized historical case uses real Yahoo Finance adjusted prices from the
 supplied, successfully executed Colab notebook. Its portfolio returns are a
 hypothetical backtest. Forward client planning and stresses remain simulations.
-The saved summaries and original charts are preserved; the raw daily-price
-cache was not attached. Re-run the notebook to create a fresh full-data export.
+The recorded summaries are translated to AED, monetary charts are redrawn
+from those summaries, and the original dimensionless diagnostics panel is
+preserved. The raw daily-price cache was not attached. Re-run the notebook to create a fresh full-data export.
 
 ## 2. Real-world finance use case
 
 A private-bank analyst prepares a portfolio review for a fictional family.
-The family has USD 2 million of investable wealth, annual real spending of
-USD 72,000, an additional USD 250,000 goal in month 24, and a desired real
-legacy of USD 500,000 after 20 years. These are case assumptions, not facts
+The family has AED 7,345,000 of investable wealth, annual real spending of
+AED 264,420, an additional AED 918,125 goal in month 24, and a desired real
+legacy of AED 1,836,250 after 20 years. These are case assumptions, not facts
 about the user.
 
 The analyst needs to explain diversification, concentration, interest-sensitive
@@ -44,6 +45,12 @@ or determine what is suitable for an actual person.
 The quantitative contribution is transparent accounting and useful decision
 support: different capital weights can create very different risk exposures;
 small changes in spending or return assumptions can materially change outcomes.
+
+All case amounts are UAE dirhams (AED), translated from the original USD
+case at 1 USD = AED 3.6725. Yahoo ETF price observations remain USD source
+quotes. Price relatives drive AED-denominated accounts under a constant-rate
+assumption; percentages do not change. FX spreads, conversion charges, and
+changes in the peg are not modeled. See [currency conventions](CURRENCY.md).
 
 ## 3. System architecture
 
@@ -73,7 +80,7 @@ GitHub. Analysis calls then use normal imports rather than a monolithic script.
 | Corporate-action adjustment | Yahoo adjusted prices | Embedded in synthetic test indices | Do not add dividends to adjusted returns again |
 | Risk-free comparison | Explicit 2.5% annual assumption | FRED DGS3MO with personal API key | One-day minimum lag, 7-day maximum stale age; yield approximation |
 | Portfolio mandate | User configuration | Same | Fixed before the historical calculation |
-| Client goals | Fictional configuration | Same | Dollars are USD; real-dollar goals share a t=0 basis |
+| Client goals | Fictional configuration | Same | Amounts are AED; real-value goals share a t=0 basis |
 | API credentials | None needed | Environment or Colab Secrets | Never stored in notebooks, manifests, or Git |
 
 SEC EDGAR, FMP, Alpha Vantage, and paid tick feeds are unnecessary for this
@@ -108,10 +115,11 @@ does not prevent notebook completion.
 | File or directory | Responsibility |
 |---|---|
 | `WealthLab_Colab.ipynb` | Single upload, all source code, analysis, figures, export |
+| `wealthlab/currency.py` | Reporting units, fixed USD/AED convention, formatting, and FX provenance |
 | `wealthlab/config.py` | ResearchConfig and ClientConfig input contracts |
 | `wealthlab/data.py` | Source adapters, atomic caching, adjusted-close extraction, quality checks |
 | `wealthlab/portfolio.py` | Daily holdings state and exact self-financing cost solution |
-| `wealthlab/analytics.py` | Metrics, dollar attribution, risk contribution and stresses |
+| `wealthlab/analytics.py` | Metrics, monetary attribution, risk contribution and stresses |
 | `wealthlab/planning.py` | Cash-flow simulation and sensitivity grid |
 | `wealthlab/charts.py` | Five multi-panel PNG figures |
 | `wealthlab/report.py` | Offline HTML dashboard and strict JSON |
@@ -167,13 +175,13 @@ fund operating expenses already embedded in market total returns remain embedded
 
 ### Step 6 — Inspect financial identities
 
-The accounting engine requires asset dollar P&L minus all modeled costs to equal
+The accounting engine requires asset P&L minus all modeled costs to equal
 the change from starting capital to ending NAV. Review weight sums, fee totals,
 and sample rebalance dates. Test a small known case before scaling up.
 
 ### Step 7 — Produce performance and risk diagnostics
 
-Calculate the metric table, exact dollar attribution, rolling volatility,
+Calculate the metric table, exact monetary attribution, rolling volatility,
 monthly returns, trailing risk decomposition, and hypothetical stresses.
 Compare risk contribution with capital allocation; they answer different questions.
 
@@ -234,14 +242,14 @@ source-reconciliation layer is an explicit upgrade.
 
 Derived features include rolling 63-session volatility, monthly compounded
 returns, drawdowns, trailing 252-session covariance, capital/risk weights,
-asset-level dollar profits, and gross traded NAV fractions. No machine-learning
+asset-level monetary profits, and gross traded NAV fractions. No machine-learning
 feature selection or return optimization is hidden in this project.
 
 ## 10. Core models and algorithms
 
 ### Holdings and rebalancing
 
-Let asset holdings be dollar values H, target weights w, and proportional
+Let asset holdings be reporting-currency amounts H, target weights w, and proportional
 transaction cost c. After asset returns, holdings drift naturally. Advisory fees
 reduce all positions proportionally. On a scheduled rebalance, solve:
 
@@ -264,7 +272,7 @@ This specifies an effective annual fee reduction rather than a daily simple-rate
 approximation. Fees accrue across weekends. Embedded fund fees are not deducted
 again.
 
-### Return and dollar attribution
+### Return and monetary attribution
 
 Later daily returns are NAV_t / NAV_(t-1) - 1. The first row records initial
 deployment cost against starting capital. The product over every row equals
@@ -274,7 +282,7 @@ Dollar attribution is exactly additive:
 
 $$V_T-V_0=\sum_{t,i}H_{i,t-1}r_{i,t}-\sum_t TradingCost_t-\sum_t AdvisoryFee_t.$$
 
-This is holding-level dollar contribution, not Brinson sector attribution or
+This is holding-level monetary contribution, not Brinson sector attribution or
 causal attribution. It avoids summing unlinked daily percentage contributions
 and labeling them cumulative return attribution.
 
@@ -341,10 +349,10 @@ available. Those exploratory sliders do not silently overwrite the saved report.
 | Information ratio | Annualized arithmetic active mean / tracking error |
 | Beta | Return covariance with strategic benchmark / benchmark variance |
 | Annual gross turnover | Sum of buys-plus-sells / pre-trade NAV, divided by elapsed years; initial deployment excluded |
-| Transaction costs / advisory fees | Actual deducted dollars, not terminal wealth difference |
+| Transaction costs / advisory fees | Actual deducted amounts, not terminal wealth difference |
 
 The initial cost-only row has no elapsed return interval. It enters total return,
-CAGR, drawdown, monthly returns, and dollar attribution, but is excluded from
+CAGR, drawdown, monthly returns, and monetary attribution, but is excluded from
 daily-distribution risk statistics. A zero denominator produces an undefined
 ratio, serialized as JSON null and displayed as 'Undefined'.
 
@@ -356,14 +364,14 @@ is a reporting convention whose limits matter when returns are autocorrelated.
 
 The deliverables are the complete self-contained notebook, reusable Python
 package, tests, command-line entry point, dependency specifications, guide,
-Yahoo case dashboard, analytical summary tables, original figures, assumptions, and
+Yahoo case dashboard, analytical summary tables, currency-labeled figures, assumptions, and
 checksummed run manifest. The notebook exports a ZIP of the specific run.
 
 Suggested resume wording after reproducing and understanding the project:
 
 > Developed a Python/Google Colab wealth analytics platform with self-financing
 > multi-asset portfolio accounting, transaction-cost-aware rebalancing, reconciled
-> dollar attribution, risk decomposition, and Monte Carlo client spending analysis;
+> monetary attribution, risk decomposition, and Monte Carlo client spending analysis;
 > automated reproducible HTML reporting and financial validation checks.
 
 Interview topics to prepare:

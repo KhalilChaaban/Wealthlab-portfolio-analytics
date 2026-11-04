@@ -24,7 +24,11 @@ class IntegrationTests(unittest.TestCase):
             self.assertEqual(len(result.chart_paths), 5)
             self.assertTrue(all(p.read_bytes().startswith(b"\x89PNG") for p in result.chart_paths.values()))
             manifest = json.loads((result.output_dir / "run_manifest.json").read_text())
-            self.assertLess(abs(manifest["validation"]["attribution_residual_usd"]), 1e-6)
+            self.assertLess(abs(manifest["validation"]["attribution_residual_aed"]), 1e-6)
+            self.assertEqual(manifest["currency"]["reporting_currency"], "AED")
+            self.assertIn("Ending NAV AED", result.metrics.index)
+            self.assertIn("AED 264,420", html)
+            self.assertNotIn("Ending NAV USD", html)
             self.assertIn("source_code_sha256", manifest)
             self.assertEqual(len(list(Path(result.output_dir).glob("*.csv"))), 12)
 

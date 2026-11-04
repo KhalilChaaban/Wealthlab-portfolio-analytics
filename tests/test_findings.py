@@ -22,10 +22,10 @@ class FindingsTests(unittest.TestCase):
         client = ClientConfig(horizon_years=1, paths=100, one_off_spending={})
         m = pd.DataFrame({'Client portfolio': {'CAGR': .08, 'Total return': .1,
             'Annualized volatility': .09, 'Maximum drawdown': -.2, 'Sharpe ratio': .5,
-            'Ending NAV USD': 1100000, 'Advisory fees USD': 1000, 'Transaction costs USD': 100},
+            'Ending NAV AED': 1100000, 'Advisory fees AED': 1000, 'Transaction costs AED': 100},
             'Strategic benchmark': {'CAGR': .05, 'Total return': .08,
             'Annualized volatility': .1, 'Maximum drawdown': -.22, 'Sharpe ratio': .3,
-            'Ending NAV USD': 1080000}})
+            'Ending NAV AED': 1080000}})
         risk = pd.DataFrame({'capital_weight': [.3,.4], 'risk_share': [.6,.1]}, index=['SPY','AGG'])
         pnl = pd.Series({'SPY': 100000., 'AGG': 1100., 'Trading costs': -100., 'Advisory fees': -1000.})
         stress = pd.DataFrame({'portfolio_return': [-.1]}, index=['Test shock'])

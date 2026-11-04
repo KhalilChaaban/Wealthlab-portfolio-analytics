@@ -17,7 +17,8 @@
       "SPY": 0.6,
       "AGG": 0.4
     },
-    "initial_capital": 1000000,
+    "currency": "AED",
+    "initial_capital": 3672500.0,
     "trading_cost_bps": 5,
     "advisory_fee_annual": 0.005,
     "rebalance": "monthly",
@@ -30,17 +31,18 @@
   },
   "client": {
     "label": "Illustrative family mandate",
-    "current_wealth": 2000000,
-    "annual_spending_today": 72000,
+    "currency": "AED",
+    "current_wealth": 7345000.0,
+    "annual_spending_today": 264420.0,
     "horizon_years": 20,
     "inflation": 0.025,
     "expected_annual_return": 0.06,
     "annual_volatility": 0.12,
-    "legacy_goal_today": 500000,
+    "legacy_goal_today": 1836250.0,
     "paths": 5000,
     "seed": 2026,
     "one_off_spending": {
-      "24": 250000
+      "24": 918125.0
     }
   }
 }

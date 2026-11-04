@@ -10,10 +10,11 @@ import platform
 
 import pandas as pd
 
-from .analytics import (dollar_attribution, hypothetical_stress, monthly_returns,
+from .analytics import (pnl_attribution, hypothetical_stress, monthly_returns,
                         performance_metrics, risk_contributions)
 from .charts import create_charts
 from .config import ClientConfig, ResearchConfig, ensure_directory
+from .currency import currency_metadata
 from .data import atomic_text, clean_prices, load_prices, risk_free_returns
 from .findings import build_findings
 from .planning import planning_sensitivity, simulate_client
@@ -39,6 +40,8 @@ def run_project(config: ResearchConfig | None = None, client: ClientConfig | Non
                 root: str | Path = ".", refresh: bool = False) -> ProjectRun:
     config = config or ResearchConfig()
     client = client or ClientConfig()
+    if config.currency != client.currency:
+        raise ValueError("Research and client reporting currencies must match.")
     root = Path(root).resolve()
     LOGGER.info("Loading %s price data.", config.source)
     market = load_prices(config, root / "data/cache", refresh=refresh)
@@ -47,11 +50,12 @@ def run_project(config: ResearchConfig | None = None, client: ClientConfig | Non
     kwargs = dict(initial_capital=config.initial_capital,
                   trading_cost_bps=config.trading_cost_bps,
                   advisory_fee_annual=config.advisory_fee_annual,
-                  rebalance=config.rebalance)
+                  rebalance=config.rebalance, currency=config.currency)
     portfolio = run_backtest(prices, config.weights, **kwargs)
     benchmark = run_backtest(prices, config.benchmark, **kwargs)
     frictionless = run_backtest(prices, config.weights, initial_capital=config.initial_capital,
-                                trading_cost_bps=0, advisory_fee_annual=0, rebalance=config.rebalance)
+                                trading_cost_bps=0, advisory_fee_annual=0,
+                                rebalance=config.rebalance, currency=config.currency)
     metrics = pd.DataFrame({
         "Client portfolio": performance_metrics(portfolio, rf, benchmark, config.periods_per_year),
         "Strategic benchmark": performance_metrics(benchmark, rf, periods_per_year=config.periods_per_year),
@@ -59,7 +63,7 @@ def run_project(config: ResearchConfig | None = None, client: ClientConfig | Non
     })
     asset_returns = prices.pct_change(fill_method=None).iloc[1:]
     risk = risk_contributions(asset_returns, portfolio.weights.iloc[-1], config.periods_per_year)
-    attribution = dollar_attribution(portfolio)
+    attribution = pnl_attribution(portfolio)
     stress = hypothetical_stress(portfolio.weights.iloc[-1])
     projection = simulate_client(client, config.advisory_fee_annual)
     sensitivity = planning_sensitivity(client, config.advisory_fee_annual)
@@ -89,7 +93,7 @@ def run_project(config: ResearchConfig | None = None, client: ClientConfig | Non
         "benchmark_history.csv": benchmark.history,
         "held_weights.csv": portfolio.weights,
         "asset_pnl.csv": portfolio.asset_pnl,
-        "dollar_attribution.csv": attribution.to_frame(),
+        "pnl_attribution.csv": attribution.to_frame(),
         "risk_contributions.csv": risk,
         "monthly_returns.csv": monthly_returns(portfolio).to_frame(),
         "hypothetical_stress.csv": stress,
@@ -111,7 +115,8 @@ def run_project(config: ResearchConfig | None = None, client: ClientConfig | Non
         **identity, "run_id": run_id, "python": platform.python_version(),
         "packages": versions, "data_provenance": market.manifest, "quality": quality,
         "source_label": source_label,
-        "validation": {"attribution_residual_usd": float(
+        "currency": currency_metadata(config.currency),
+        "validation": {f"attribution_residual_{config.currency.lower()}": float(
             portfolio.history.nav.iloc[-1] - config.initial_capital - attribution.sum())},
         "planning": {"joint_success_frequency": projection.success_probability,
                      "all_spending_funded_frequency": projection.survival_probability,

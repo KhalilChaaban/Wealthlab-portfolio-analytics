@@ -1,11 +1,11 @@
 ,Client portfolio,Strategic benchmark,Before modeled costs
-Advisory fees USD,75532.2,84051.42,0.0
+Advisory fees AED,277392.0045,308678.83995,0.0
 Annual gross turnover excl. initial,0.2366,0.1947,0.2366
 Annualized volatility,0.0938,0.1093,0.0938
 Beta to benchmark,0.8242,,0.8242
 CAGR,0.0683,0.0839,0.0739
 Calmar ratio,0.3405,0.3904,0.3741
-Ending NAV USD,2068724.6077,2425311.9269,2189879.9128
+Ending NAV AED,7597391.12177825,8906958.05154025,8042333.979758
 Historical daily ES 95%,0.0138,0.0166,0.0138
 Historical daily VaR 95%,0.0085,0.0101,0.0084
 Information ratio,-0.4955,,-0.337
@@ -15,4 +15,4 @@ Sharpe ratio,0.4898,0.5673,0.5446
 Sortino ratio,0.6738,0.7877,0.7508
 Total return,1.0687,1.4253,1.1899
 Tracking error,0.0324,,0.0324
-Transaction costs USD,2259.674,2117.381,0.0
+Transaction costs AED,8298.652764999999,7776.081722499999,0.0

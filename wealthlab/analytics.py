@@ -17,7 +17,7 @@ def performance_metrics(result: BacktestResult, risk_free: pd.Series,
                         periods_per_year: int = 252) -> pd.Series:
     """Calendar-time CAGR; daily-sample volatility and Sharpe use n-1 return periods.
 
-    Initial purchase cost enters total return/CAGR and dollar attribution. It
+    Initial purchase cost enters total return/CAGR and monetary attribution. It
     is omitted from daily-distribution risk metrics because it has no elapsed
     return interval. Benchmark and portfolio use the same execution assumptions.
     """
@@ -52,11 +52,13 @@ def performance_metrics(result: BacktestResult, risk_free: pd.Series,
         "Historical daily VaR 95%": var, "Historical daily ES 95%": es,
         "Positive-return day fraction": float((returns > 0).mean()),
         "Annual gross turnover excl. initial": result.history["gross_traded_nav_fraction"].iloc[1:].sum() / years,
-        "Transaction costs USD": result.history["transaction_cost"].sum(),
-        "Advisory fees USD": result.history["advisory_fee"].sum(),
-        "Ending NAV USD": result.history["nav"].iloc[-1],
+        f"Transaction costs {result.currency}": result.history["transaction_cost"].sum(),
+        f"Advisory fees {result.currency}": result.history["advisory_fee"].sum(),
+        f"Ending NAV {result.currency}": result.history["nav"].iloc[-1],
     }
     if benchmark is not None:
+        if benchmark.currency != result.currency:
+            raise ValueError("Portfolio and benchmark reporting currencies must match.")
         if not benchmark.returns.index.equals(result.returns.index):
             raise ValueError("Portfolio and benchmark dates must match exactly.")
         b = benchmark.returns.iloc[1:]
@@ -70,13 +72,18 @@ def performance_metrics(result: BacktestResult, risk_free: pd.Series,
     return pd.Series(metrics, name="value")
 
 
-def dollar_attribution(result: BacktestResult) -> pd.Series:
-    """Exact additive P&L in dollars; no ambiguous compounding of percentage contributions."""
+def pnl_attribution(result: BacktestResult) -> pd.Series:
+    """Exact additive P&L in the result's reporting currency."""
     contribution = result.asset_pnl.sum()
     contribution.loc["Trading costs"] = -result.history["transaction_cost"].sum()
     contribution.loc["Advisory fees"] = -result.history["advisory_fee"].sum()
-    contribution.name = "profit_usd"
+    contribution.name = f"profit_{result.currency.lower()}"
     return contribution
+
+
+def dollar_attribution(result: BacktestResult) -> pd.Series:
+    """Compatibility alias; returned amounts use result.currency, including AED."""
+    return pnl_attribution(result)
 
 
 def risk_contributions(asset_returns: pd.DataFrame, weights: pd.Series,

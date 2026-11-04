@@ -5,6 +5,8 @@ from pathlib import Path
 import math
 import pandas as pd
 
+from .currency import validate_currency
+
 
 ASSET_NAMES = {
     "SPY": "US equities", "VEA": "Developed ex-US equities",
@@ -38,7 +40,8 @@ class ResearchConfig:
     end: str = "2026-01-01"
     weights: dict[str, float] = field(default_factory=lambda: DEFAULT_WEIGHTS.copy())
     benchmark: dict[str, float] = field(default_factory=lambda: {"SPY": 0.60, "AGG": 0.40})
-    initial_capital: float = 1_000_000.0
+    currency: str = "AED"
+    initial_capital: float = 3_672_500.0
     trading_cost_bps: float = 5.0
     advisory_fee_annual: float = 0.005
     rebalance: str = "monthly"
@@ -50,6 +53,7 @@ class ResearchConfig:
     seed: int = 42
 
     def __post_init__(self) -> None:
+        validate_currency(self.currency)
         validate_weights(self.weights)
         validate_weights(self.benchmark, "benchmark")
         if set(self.benchmark) - set(self.weights):
@@ -87,19 +91,21 @@ class ClientConfig:
     """Fictional planning case, separate from the historical backtest capital."""
 
     label: str = "Illustrative family mandate"
-    current_wealth: float = 2_000_000.0
-    annual_spending_today: float = 72_000.0
+    currency: str = "AED"
+    current_wealth: float = 7_345_000.0
+    annual_spending_today: float = 264_420.0
     horizon_years: int = 20
     inflation: float = 0.025
     expected_annual_return: float = 0.06
     annual_volatility: float = 0.12
-    legacy_goal_today: float = 500_000.0
+    legacy_goal_today: float = 1_836_250.0
     paths: int = 5_000
     seed: int = 2026
-    # Keys are one-based simulation months; values are today's dollars.
-    one_off_spending: dict[int, float] = field(default_factory=lambda: {24: 250_000.0})
+    # Keys are one-based simulation months; amounts use today's reporting currency.
+    one_off_spending: dict[int, float] = field(default_factory=lambda: {24: 918_125.0})
 
     def __post_init__(self) -> None:
+        validate_currency(self.currency)
         for name in ("current_wealth", "annual_spending_today", "inflation",
                      "expected_annual_return", "annual_volatility", "legacy_goal_today"):
             if not math.isfinite(getattr(self, name)):

@@ -44,6 +44,9 @@ def main():
 
         **Case:** a fictional family's portfolio and spending plan. Historical capital,
         current planning wealth, and forward-return assumptions are explicitly separate.
+        **Reporting currency: UAE dirhams (AED).** Existing case amounts are
+        translated at 1 USD = AED 3.6725. Yahoo quotes remain USD source data;
+        a constant USD/AED reporting rate is assumed. Percentage results are unchanged.
         Full methodology, source references, and resume wording are included in the final cells.
     '''), markdown('''
         ## Cell 01 — Environment and dedicated workspace
@@ -87,7 +90,7 @@ def main():
         ("__init__.py", "Package identity", "Versioned, inspectable research code."),
         ("config.py", "Validated assumptions", "Rates are decimals; weights must sum to one. No silent normalization."),
         ("data.py", "Collection, caching, and cleaning", "Adjusted-price semantics, schema handling, retries, checksums, and explicit failure."),
-        ("portfolio.py", "Self-financing portfolio accounting", "Dollar holdings drift between scheduled closes; costs are funded from portfolio value."),
+        ("portfolio.py", "Self-financing portfolio accounting", "AED holdings drift between scheduled closes; costs are funded from portfolio value."),
         ("analytics.py", "Performance and risk algorithms", "Exact attribution and transparent reporting conventions."),
         ("planning.py", "Client cash-flow scenarios", "Monthly spending, one-off goals, inflation, depletion, and legacy targets."),
         ("charts.py", "Professional chart engine", "Saved, portable figures with prominent source labels."),
@@ -105,12 +108,12 @@ def main():
                           + f"module_source = '''{literal}'''\n" \
                           + f"(PROJECT_ROOT / 'wealthlab' / '{name}').write_text(module_source, encoding='utf-8')\n" \
                           + f"print('Created wealthlab/{name}')"
-        if name == "report.py":
-            findings_source = (ROOT / "wealthlab/findings.py").read_text()
+        for extra_name in ({"config.py": ["currency.py"], "report.py": ["findings.py"]}.get(name, [])):
+            findings_source = (ROOT / "wealthlab" / extra_name).read_text()
             findings_literal = findings_source.replace("\\", "\\\\").replace("'''", "\\'\\'\\'")
             module_cell += (f"\nfindings_source = '''{findings_literal}'''\n"
-                            "(PROJECT_ROOT / 'wealthlab/findings.py').write_text(findings_source, encoding='utf-8')\n"
-                            "print('Created wealthlab/findings.py')")
+                            f"(PROJECT_ROOT / 'wealthlab' / '{extra_name}').write_text(findings_source, encoding='utf-8')\n"
+                            f"print('Created wealthlab/{extra_name}')")
         cells.append(code(module_cell))
         number += 1
 
@@ -122,6 +125,8 @@ def main():
         `USE_FRED=False` uses an explicit annual risk-free assumption, not observed rates.
         FRED mode reads your own secret; credentials are never printed or exported.
         Keep the documented eight ETF labels unless you extend the stress and demo mappings.
+        All capital, spending, fees, and goals below are AED. Raw Yahoo prices
+        remain USD quotes; their percentage changes drive AED portfolio accounting.
     '''), code('''
         # CELL 12 | User-editable configuration
         from dataclasses import replace
@@ -154,20 +159,22 @@ def main():
 
         CONFIG = ResearchConfig(
             source=SOURCE, start="2015-01-01", end="2026-01-01",
-            initial_capital=1_000_000, trading_cost_bps=5,
+            currency="AED", initial_capital=3_672_500, trading_cost_bps=5,
             advisory_fee_annual=0.005, rebalance="monthly",
             annual_risk_free_rate=0.025,
             risk_free_source="fred" if USE_FRED else "constant",
         )
         CLIENT = ClientConfig(
-            current_wealth=2_000_000, annual_spending_today=72_000,
+            currency="AED", current_wealth=7_345_000, annual_spending_today=264_420,
             horizon_years=20, inflation=0.025, expected_annual_return=0.06,
-            annual_volatility=0.12, legacy_goal_today=500_000,
-            one_off_spending={24: 250_000}, paths=5_000,
+            annual_volatility=0.12, legacy_goal_today=1_836_250,
+            one_off_spending={24: 918_125}, paths=5_000,
         )
         print("SYNTHETIC DEMO — NOT MARKET DATA" if SOURCE == "demo" else "YAHOO MARKET-DATA RESEARCH")
         display(CONFIG.to_dict())
         display(CLIENT.to_dict())
+        from wealthlab.currency import currency_disclosure
+        print(currency_disclosure(CONFIG.currency))
     '''), markdown('''
         ## Cell 13 — Data collection and strict quality checks
 
@@ -183,6 +190,7 @@ def main():
         risk_free, risk_free_metadata = risk_free_returns(
             prices.index, CONFIG, PROJECT_ROOT / "data/cache", refresh=REFRESH_CACHE)
         asset_returns = prices.pct_change(fill_method=None).iloc[1:]
+        print("Source ETF adjusted-price quotes: USD. Account and client amounts:", CONFIG.currency)
         display(prices.head())
         display(quality)
         print("Source:", market.manifest["provider"])
@@ -190,27 +198,27 @@ def main():
     '''), markdown('''
         ## Cell 14 — Portfolio accounting and exact reconciliation
 
-        The engine accrues returns on held dollar positions, deducts calendar-day fees,
+        The engine accrues returns on held AED positions, deducts calendar-day fees,
         then rebalances at predetermined closes. The self-financing cost equation is solved
         numerically. Initial purchases also pay costs. No deposits or withdrawals enter
         this historical account; those belong to the client-planning track.
     '''), code('''
         # CELL 14 | Portfolio, benchmark, and frictionless comparison
         from wealthlab.portfolio import run_backtest
-        from wealthlab.analytics import dollar_attribution
+        from wealthlab.analytics import pnl_attribution
         execution = dict(initial_capital=CONFIG.initial_capital,
                          trading_cost_bps=CONFIG.trading_cost_bps,
                          advisory_fee_annual=CONFIG.advisory_fee_annual,
-                         rebalance=CONFIG.rebalance)
+                         rebalance=CONFIG.rebalance, currency=CONFIG.currency)
         portfolio = run_backtest(prices, CONFIG.weights, **execution)
         benchmark = run_backtest(prices, CONFIG.benchmark, **execution)
         frictionless = run_backtest(prices, CONFIG.weights,
                                    initial_capital=CONFIG.initial_capital,
                                    trading_cost_bps=0, advisory_fee_annual=0,
-                                   rebalance=CONFIG.rebalance)
-        attribution = dollar_attribution(portfolio)
+                                   rebalance=CONFIG.rebalance, currency=CONFIG.currency)
+        attribution = pnl_attribution(portfolio)
         residual = portfolio.history.nav.iloc[-1] - CONFIG.initial_capital - attribution.sum()
-        print(f"Attribution residual: ${residual:.10f}")
+        print(f"Attribution residual: {CONFIG.currency} {residual:.10f}")
         display(portfolio.history.head())
         display(attribution.to_frame())
     '''), markdown('''
@@ -287,7 +295,7 @@ def main():
             import ipywidgets as widgets
             import matplotlib.pyplot as plt
             from matplotlib.ticker import FuncFormatter
-            def explore(expected_return=6.0, spending_thousands=72.0):
+            def explore(expected_return=6.0, spending_thousands=CLIENT.annual_spending_today/1000):
                 case = replace(CLIENT, expected_annual_return=expected_return/100,
                                annual_spending_today=spending_thousands*1000)
                 result = simulate_client(case, CONFIG.advisory_fee_annual)
@@ -298,8 +306,8 @@ def main():
                 ax.fill_between(q.index, q.p05, q.p95, alpha=.15, color="#008d83")
                 ax.plot(q.index, q.p50, color="#008d83", label="Median real wealth")
                 ax.axhline(case.legacy_goal_today, color="#c89135", linestyle="--", label="Legacy goal")
-                ax.set(xlabel="Years", ylabel="Today's USD", title="Illustrative planning sensitivity")
-                ax.yaxis.set_major_formatter(FuncFormatter(lambda x, pos: f"${x/1e6:.1f}m"))
+                ax.set(xlabel="Years", ylabel=f"Today's {CLIENT.currency}", title="Illustrative planning sensitivity")
+                ax.yaxis.set_major_formatter(FuncFormatter(lambda x, pos: f"{CLIENT.currency} {x/1e6:.1f}m"))
                 ax.legend(); fig.tight_layout()
                 display(fig)
                 plt.close(fig)
@@ -307,7 +315,9 @@ def main():
                 expected_return=widgets.FloatSlider(value=CLIENT.expected_annual_return*100,
                                                    min=0, max=12, step=.5, description="Return %"),
                 spending_thousands=widgets.FloatSlider(value=CLIENT.annual_spending_today/1000,
-                                                      min=20, max=160, step=2, description="Spend $k"))
+                                                      min=CLIENT.annual_spending_today/1000*.25,
+                                                      max=CLIENT.annual_spending_today/1000*2.25,
+                                                      step=2, description=f"{CLIENT.currency} k/yr"))
         else:
             print("Optional widgets unavailable or disabled. All saved outputs remain complete.")
     ''')]
@@ -315,6 +325,8 @@ def main():
     # Embed tests and guide so the notebook remains a complete standalone deliverable.
     supplemental = [*sorted((ROOT / "tests").glob("test_*.py")), ROOT / "docs/PROJECT_GUIDE.md",
                     ROOT / "docs/VALIDATION.md", ROOT / "LICENSE", ROOT / "pyproject.toml",
+                    ROOT / "docs/PERSONAL_REFLECTION.md", ROOT / "docs/RESEARCH_NOTES.md",
+                    ROOT / "docs/CURRENCY.md",
                     ROOT / "config/demo.json", ROOT / ".gitignore", ROOT / ".github/workflows/ci.yml",
                     ROOT / "tools/check_notebook.py", ROOT / "tools/build_notebook.py",
                     ROOT / "README.md", ROOT / "FINDINGS.md", ROOT / "START_HERE.html",
@@ -394,7 +406,8 @@ def main():
         ## Cell 24 — Findings and Conclusions
 
         This discussion is generated from the current run, so its numbers and data-source
-        labels match the report. The saved output preserves the uploaded Yahoo case.
+        labels match the report. Saved outputs show the uploaded Yahoo summary case
+        translated to AED, with recalculated planning scenarios. They are not a new download.
     '''), code('''
         # CELL 24 | Findings generated from the actual run
         display(Markdown((RUN.output_dir / "FINDINGS.md").read_text(encoding="utf-8")))

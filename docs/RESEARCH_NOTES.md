@@ -16,6 +16,12 @@ spending and meet a terminal legacy target?
 
 ## Why these choices?
 
+The current reporting currency is AED. Original USD case amounts are translated
+at a fixed 1 USD = AED 3.6725; the source Yahoo quotes remain USD. This changes
+monetary units while preserving the recorded percentage results. It does not
+introduce UAE securities, taxes, or client suitability assumptions. See
+[currency conventions](CURRENCY.md).
+
 | Choice | Role in this example | What remains open |
 |---|---|---|
 | Eight USD-listed ETFs | Provides exposure to US, developed-market and emerging-market stocks, bonds, inflation-linked bonds, gold, real estate, and Treasury bills. | ETFs are proxies. Their exposures overlap, and the universe was selected retrospectively. |

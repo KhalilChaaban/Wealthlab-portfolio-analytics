@@ -44,7 +44,7 @@ def simulate_client(client: ClientConfig, advisory_fee_annual: float = .005,
     scale = sigma / np.sqrt(12)
     fee_factor = (1 - advisory_fee_annual) ** (1 / 12)
     for m in range(1, months + 1):
-        # Month 1 spending is today's nominal amount; the real-dollar basis is t=0.
+        # Month 1 spending is today's nominal amount; the real-value basis is t=0.
         inflation_factor = (1 + client.inflation) ** ((m - 1) / 12)
         payment = (client.annual_spending_today / 12 + client.one_off_spending.get(m, 0)) * inflation_factor
         funded &= balances[m - 1] >= payment
@@ -74,7 +74,8 @@ def planning_sensitivity(client: ClientConfig, advisory_fee_annual: float) -> pd
     spending = [client.annual_spending_today * .8, client.annual_spending_today,
                 client.annual_spending_today * 1.2]
     table = pd.DataFrame(index=spending, columns=means, dtype=float)
-    table.index.name, table.columns.name = "annual_spending_today_usd", "expected_nominal_return"
+    table.index.name = f"annual_spending_today_{client.currency.lower()}"
+    table.columns.name = "expected_nominal_return"
     for expense in spending:
         for mean in means:
             case = replace(client, annual_spending_today=expense, expected_annual_return=mean)

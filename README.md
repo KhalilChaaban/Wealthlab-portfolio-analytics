@@ -53,14 +53,15 @@ Double-click **`START_HERE.html`**, then choose **Open the Yahoo portfolio repor
 The updated notebook, findings, code, figures, and result tables are already in
 place. Manual notebook replacement is unnecessary.
 
-The example preserves the actual Yahoo outputs in the supplied Colab notebook.
-Summary tables inherit saved display precision. The raw daily-price cache was
+The example translates the recorded Yahoo summary results into AED. Monetary
+charts are redrawn from those summaries, and the original dimensionless risk
+diagnostics panel is preserved. Summary tables inherit saved display precision. The raw daily-price cache was
 not attached; rerun the notebook for a fresh download and full daily CSV exports.
 See [saved-case provenance](examples/yahoo/provenance.json).
 
 ## Findings from the Yahoo case
 
-The portfolio used **2,766 common daily price observations**, a USD 1 million
+The portfolio used **2,766 common daily price observations**, an AED 3,672,500
 starting account, monthly rebalancing, 5 bps of trading costs, and a 0.50%
 annual advisory fee.
 
@@ -70,11 +71,11 @@ annual advisory fee.
 | Annualized volatility | 9.38% | 10.93% |
 | Maximum drawdown | -20.07% | -21.49% |
 | Sharpe ratio | 0.49 | 0.57 |
-| Ending wealth from USD 1 million | USD 2,068,725 | USD 2,425,312 |
+| Ending wealth from AED 3,672,500 | AED 7,597,391 | AED 8,906,958 |
 
 The portfolio was less volatile, but earned less than the benchmark. SPY
 accounted for approximately 27.93% of ending capital and 53.02% of estimated
-trailing volatility. It was also the largest positive dollar contributor.
+trailing volatility. It was also the largest positive monetary contributor.
 Sharpe uses an assumed 2.50% annual risk-free rate in this case.
 
 Client planning was separate: 89.32% of simulated paths funded all spending,
@@ -124,7 +125,7 @@ existing matching cache snapshot. Keep an old snapshot separately if needed.
 
 - Eight USD-listed ETF proxies, a default 60/40 benchmark, and fixed strategic weights.
 - Drifting holdings with monthly, quarterly, or buy-and-hold schedules.
-- Self-financing transaction costs, calendar-day advisory fees, and exact dollar P&L attribution.
+- Self-financing transaction costs, calendar-day advisory fees, and exact monetary P&L attribution.
 - CAGR, Sharpe, Sortino, drawdown, historical VaR/ES, beta, and tracking error.
 - Trailing Euler risk contributions and hypothetical portfolio stresses.
 - Monthly client cash-flow simulation with inflation, one-off spending, and a real legacy target.
@@ -170,26 +171,34 @@ flowchart TD
 | `config/yahoo.json` | Editable Yahoo case mandate |
 | `config/demo.json` | Explicit offline test mandate |
 | `docs/PROJECT_GUIDE.md` | Full build guide, equations, use cases, resume wording, upgrades |
+| `docs/CURRENCY.md` | AED amounts, fixed-rate translation, and source-quote conventions |
 | `docs/VALIDATION.md` | Validation scope and limitations |
-| `examples/yahoo/` | Saved Yahoo report, original figures, summary tables, and provenance |
+| `examples/yahoo/` | AED report, redrawn monetary charts, summary tables, and provenance |
 | `data/cache/` | Local data snapshots; ignored by Git |
 | `reports/{source}/{run_id}/` | Generated research outputs; ignored by Git |
 
 ## Default assumptions
 
+**Reporting currency: UAE dirhams (AED).** The existing case amounts use a fixed
+translation of **1 USD = AED 3.6725**, verified against the
+[Central Bank of the UAE](https://centralbank.ae/en/forex-eibor/exchange-rates/).
+Yahoo quotes remain USD source data. A constant reporting rate is assumed; FX
+spreads and changes in the peg are outside the model. Percentage returns and
+risk measures are unchanged. See [currency conventions](docs/CURRENCY.md).
+
 | Assumption | Default |
 |---|---|
-| Research starting capital | USD 1,000,000 |
+| Research starting capital | AED 3,672,500 |
 | Target weights | SPY 28%, VEA 12%, VWO 8%, AGG 25%, TIP 10%, GLD 7%, VNQ 5%, BIL 5% |
 | Benchmark | SPY 60%, AGG 40%; same cost and fee conventions |
 | Rebalance | First available close in a new calendar month |
 | Trading cost | 5 bps of gross traded notional, including initial deployment |
 | Advisory fee | 0.50% annual compounded reduction, accrued by elapsed calendar days |
 | Risk-free assumption | 2.50% effective annual; optional lagged FRED DGS3MO proxy |
-| Client planning wealth | USD 2,000,000; distinct from backtest capital |
-| Annual spending | USD 72,000 in today's purchasing power |
-| Additional goal | USD 250,000 in today's dollars at simulation month 24 |
-| Planning horizon / legacy goal | 20 years / USD 500,000 in today's dollars |
+| Client planning wealth | AED 7,345,000; distinct from backtest capital |
+| Annual spending | AED 264,420 in today's purchasing power |
+| Additional goal | AED 918,125 in today's purchasing power at simulation month 24 |
+| Planning horizon / legacy goal | 20 years / AED 1,836,250 in today's purchasing power |
 | Planning return / volatility / inflation | 6% expected annual nominal simple return / 12% / 2.5% |
 | Simulation | 5,000 paths; reproducible seed; no automatic historical calibration |
 
@@ -207,8 +216,8 @@ directory. It is not a Jupyter-kernel or Colab-browser integration test.
 
 The uploaded Colab notebook contains a successful Yahoo run and 38 passing
 tests. The finalization environment cannot make a new Yahoo download. The saved
-Yahoo outputs and plots were preserved, the findings were corrected, and the
-updated reporting code was tested independently offline. FRED was not used in
+Yahoo summaries were translated into AED, monetary charts were redrawn from
+those summaries, and updated code was tested independently offline. FRED was not used in
 the saved case. See [validation details](docs/VALIDATION.md).
 
 No taxes, suitability determination, lending, estate planning, whole-share lots,
@@ -221,7 +230,7 @@ of these assumptions. Do not publish Yahoo-derived data without verifying rights
 Use after reproducing the work and being able to explain its assumptions:
 
 > Built a Python/Google Colab wealth analytics platform combining multi-asset
-> portfolio accounting, transaction-cost-aware rebalancing, reconciled dollar
+> portfolio accounting, transaction-cost-aware rebalancing, reconciled monetary
 > attribution, risk diagnostics, and Monte Carlo client spending analysis;
 > produced reproducible HTML reports with documented data provenance and automated
 > financial validation tests.

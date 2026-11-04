@@ -14,7 +14,7 @@ The supplied artifact was checked on 2026-11-04 with Python 3.12.14, NumPy
   caches, checksum corruption, duplicate conflicts, invalid prices, missing
   interior observations, late inception, and lagged cached FRED observations.
 - Planning tests cover deterministic cash-flow solutions, annual growth and fee
-  compounding, real-dollar deflation, one-off spending, absorbing depletion,
+  compounding, real-value deflation, one-off spending, absorbing depletion,
   legacy-target semantics, reproducible shocks, and spending sensitivity.
 - An end-to-end test verifies the HTML report, five PNG figures, twelve CSVs
   including synthetic prices, JSON manifest, attribution reconciliation, and
@@ -46,10 +46,26 @@ Run the Yahoo-configured notebook to retrieve fresh prices and full daily CSVs.
 Client planning was independently recalculated from its saved assumptions.
 
 Updated reporting includes automatically generated findings. Two additional
-tests cover source-aware wording and safe HTML rendering. The final offline
-suite contains 40 passing tests. All 24 current code cells passed the isolated
+tests cover source-aware wording and safe HTML rendering. The previous finalization suite contained 40 passing tests. All 24 current code cells passed the isolated
 computational notebook check with an explicit demo override; that check does
 not replace or relabel the preserved Yahoo case.
+
+## AED reporting update
+
+The current suite has **47 passing offline tests**, including seven currency
+tests. These verify fixed-rate translation, the converted default case, matching
+USD/AED percentage returns and weights, scaled P&L and costs, unchanged planning
+goal frequencies under the same shocks, currency validation, and rejection of
+mixed reporting currencies before data access. The integration check verifies
+AED report labels, monetary metric keys, and reconciliation.
+
+Recorded Yahoo monetary summaries were multiplied by 3.6725 once; rate, source,
+translation factor, and original USD assumptions are retained in provenance.
+Percentage metrics and the original data checksum were preserved. Monetary
+charts are redrawn from the available summaries and recalculated planning; no
+missing daily history is inferred. The original dimensionless diagnostics panel
+is retained. The updated notebook is checked separately in explicit offline
+demo mode, which does not replace its saved Yahoo case.
 
 ## What these checks do not establish
 

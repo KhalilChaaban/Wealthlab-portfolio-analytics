@@ -12,6 +12,7 @@ import textwrap
 import pandas as pd
 
 from .config import ClientConfig, ResearchConfig
+from .currency import currency_disclosure, format_money
 from .planning import ProjectionResult
 
 
@@ -20,6 +21,13 @@ def build_findings(config: ResearchConfig, client: ClientConfig, metrics: pd.Dat
                    projection: ProjectionResult, sensitivity: pd.DataFrame,
                    quality: dict) -> str:
     """Write a complete case discussion without hard-coding investment results."""
+    if config.currency != client.currency:
+        raise ValueError("Research and client reporting currencies must match.")
+    def money(value):
+        return format_money(value, config.currency)
+    ending_key = f"Ending NAV {config.currency}"
+    fee_key = f"Advisory fees {config.currency}"
+    cost_key = f"Transaction costs {config.currency}"
     portfolio = metrics["Client portfolio"]
     benchmark = metrics["Strategic benchmark"]
     synthetic = config.source == "demo"
@@ -36,8 +44,8 @@ def build_findings(config: ResearchConfig, client: ClientConfig, metrics: pd.Dat
     best = asset_pnl.idxmax()
     negative = asset_pnl[asset_pnl < 0]
     extra_attribution = (f"The largest negative asset contribution came from {negative.idxmin()}, "
-                         f"at approximately **${negative.min():,.0f}**." if len(negative)
-                         else "Every asset made a positive cumulative dollar contribution in this sample.")
+                         f"at approximately **{money(negative.min())}**." if len(negative)
+                         else "Every asset made a positive cumulative monetary contribution in this sample.")
     table_metrics = ["Total return", "CAGR", "Annualized volatility", "Maximum drawdown", "Sharpe ratio"]
     labels = ["Total return", "Annualized return (CAGR)", "Annualized volatility", "Maximum drawdown", "Sharpe ratio"]
     rows = ["| Metric | Client portfolio | Strategic benchmark |", "|---|---:|---:|"]
@@ -51,7 +59,7 @@ def build_findings(config: ResearchConfig, client: ClientConfig, metrics: pd.Dat
     low_return = float(sensitivity.columns.min())
     spending = min(sensitivity.index, key=lambda value: abs(float(value)-client.annual_spending_today))
     low_success = float(sensitivity.loc[spending, low_return])
-    one_off = "; ".join(f"${value:,.0f} in month {month}" for month, value in sorted(client.one_off_spending.items())) or "none"
+    one_off = "; ".join(f"{money(value)} in month {month}" for month, value in sorted(client.one_off_spending.items())) or "none"
     text = f"""
 ## Findings and Conclusions
 
@@ -59,23 +67,25 @@ def build_findings(config: ResearchConfig, client: ClientConfig, metrics: pd.Dat
 
 This project explored how a diversified portfolio performed, where its risk came from, and how an investment plan might support a client's spending goals.
 
-The historical analysis used {source}, covering **{quality['first_observation']} to {quality['last_observation']}**, with **{quality['retained_rows']:,} common price observations**. The portfolio started with **${config.initial_capital:,.0f}**, rebalanced {config.rebalance}, and included **{config.trading_cost_bps:g} basis points** of cost per dollar traded and a **{config.advisory_fee_annual:.2%} annual advisory fee**.
+The historical analysis used {source}, covering **{quality['first_observation']} to {quality['last_observation']}**, with **{quality['retained_rows']:,} common price observations**. The portfolio started with **{money(config.initial_capital)}**, rebalanced {config.rebalance}, and included **{config.trading_cost_bps:g} basis points** of cost per unit of currency traded and a **{config.advisory_fee_annual:.2%} annual advisory fee**.
 
 {scope}
+
+{currency_disclosure(config.currency)}
 
 ### How the portfolio performed
 
 {chr(10).join(rows)}
 
-The portfolio finished at approximately **${portfolio['Ending NAV USD']:,.0f}**, compared with **${benchmark['Ending NAV USD']:,.0f}** for the benchmark. {comparison}
+The portfolio finished at approximately **{money(portfolio[ending_key])}**, compared with **{money(benchmark[ending_key])}** for the benchmark. {comparison}
 
 The Sharpe ratio used an explicit **{config.annual_risk_free_rate:.2%} annual risk-free assumption** in this case. It is a comparison assumption, not an observed cash-investment return series.
 
-Fees also added up. The portfolio paid approximately **${portfolio['Advisory fees USD']:,.0f} in advisory fees** and **${portfolio['Transaction costs USD']:,.0f} in trading costs**. These direct deductions are different from the full terminal-wealth effect, which also reflects compounding.
+Fees also added up. The portfolio paid approximately **{money(portfolio[fee_key])} in advisory fees** and **{money(portfolio[cost_key])} in trading costs**. These direct deductions are different from the full terminal-wealth effect, which also reflects compounding.
 
 ### Where the returns and risk came from
 
-**{best}** made the largest positive dollar contribution, approximately **${asset_pnl.loc[best]:,.0f}**. {extra_attribution}
+**{best}** made the largest positive monetary contribution, approximately **{money(asset_pnl.loc[best])}**. {extra_attribution}
 
 At the final observation, SPY represented **{spy['capital_weight']:.2%} of portfolio capital but {spy['risk_share']:.2%} of estimated volatility**. AGG represented **{agg['capital_weight']:.2%} of capital and {agg['risk_share']:.2%} of estimated volatility**. Risk contributions use the final trailing 252-return sample, rather than the entire performance window.
 
@@ -91,7 +101,7 @@ These are assumed asset-price shocks. They are not reconstructions of actual cri
 
 ### What the client planning model showed
 
-The planning exercise was separate from the historical backtest. It started with **${client.current_wealth:,.0f}**, annual spending of **${client.annual_spending_today:,.0f}**, additional spending of **{one_off}**, and a **${client.legacy_goal_today:,.0f} terminal legacy target after {client.horizon_years} years**. Spending and goals were expressed in today's purchasing power.
+The planning exercise was separate from the historical backtest. It started with **{money(client.current_wealth)}**, annual spending of **{money(client.annual_spending_today)}**, additional spending of **{one_off}**, and a **{money(client.legacy_goal_today)} terminal legacy target after {client.horizon_years} years**. Spending and goals were expressed in today's purchasing power.
 
 The model used **{client.expected_annual_return:.0%} expected annual nominal return before advisory fees, {client.annual_volatility:.0%} volatility, and {client.inflation:.1%} inflation**, across **{client.paths:,} simulated paths**. These forward assumptions were set explicitly; they were not automatically inferred from historical returns.
 

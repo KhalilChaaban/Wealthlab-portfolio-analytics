@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 
 from .config import validate_weights
+from .currency import validate_currency
 
 
 @dataclass
@@ -14,6 +15,7 @@ class BacktestResult:
     asset_pnl: pd.DataFrame
     initial_capital: float
     target_weights: pd.Series
+    currency: str = "AED"
 
     @property
     def returns(self) -> pd.Series:
@@ -59,14 +61,16 @@ def self_financing_rebalance(holdings: np.ndarray, total_nav: float,
 
 
 def run_backtest(prices: pd.DataFrame, target_weights: dict[str, float],
-                 initial_capital: float = 1_000_000, trading_cost_bps: float = 5,
-                 advisory_fee_annual: float = .005, rebalance: str = "monthly") -> BacktestResult:
+                 initial_capital: float = 3_672_500, trading_cost_bps: float = 5,
+                 advisory_fee_annual: float = .005, rebalance: str = "monthly",
+                 currency: str = "AED") -> BacktestResult:
     """Accrue asset returns, deduct fees, then execute predetermined close rebalances.
 
     Rebalance on the first available close in a new month/quarter. Target
     weights are fixed before the test. No external flows, shorting, fractional
     share constraints, taxes, or uninvested cash are modeled after deployment.
     """
+    validate_currency(currency)
     validate_weights(target_weights)
     if (len(prices) < 2 or prices.empty or prices.index.has_duplicates
             or prices.columns.has_duplicates or not prices.index.is_monotonic_increasing
@@ -122,4 +126,4 @@ def run_backtest(prices: pd.DataFrame, target_weights: dict[str, float],
     if not np.isclose(nav[-1] - initial_capital, explained_profit, atol=1e-6, rtol=1e-10):
         raise ArithmeticError("Portfolio P&L attribution failed to reconcile.")
     return BacktestResult(history, pd.DataFrame(weights, index=prices.index,
-                           columns=prices.columns).rename_axis("date"), pnl, initial_capital, target)
+                           columns=prices.columns).rename_axis("date"), pnl, initial_capital, target, currency)

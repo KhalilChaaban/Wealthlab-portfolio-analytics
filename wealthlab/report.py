@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 
 from .config import ClientConfig, ResearchConfig
+from .currency import currency_disclosure, currency_metadata, format_money
 from .data import atomic_text
 from .planning import ProjectionResult
 from .findings import findings_to_html
@@ -35,8 +36,8 @@ def write_json(path: Path, value) -> None:
 def _metric_value(name: str, value: float) -> str:
     if pd.isna(value):
         return "Undefined"
-    if "USD" in name:
-        return f"${value:,.0f}"
+    if name.endswith((" USD", " AED")):
+        return format_money(value, name.rsplit(" ", 1)[-1])
     if "ratio" in name.lower() or "Beta" in name:
         return f"{value:.2f}"
     return f"{value:.2%}"
@@ -46,6 +47,10 @@ def create_html_report(path: Path, config: ResearchConfig, client: ClientConfig,
                        metrics: pd.DataFrame, projection: ProjectionResult,
                        chart_paths: dict[str, Path], quality: dict, manifest: dict,
                        risk_free_metadata: dict, findings_markdown: str | None = None) -> Path:
+    if config.currency != client.currency:
+        raise ValueError("Research and client reporting currencies must match.")
+    def money(value):
+        return format_money(value, config.currency)
     synthetic = config.source == "demo"
     badge = "SYNTHETIC DEMO · NOT MARKET PERFORMANCE" if synthetic else "YAHOO FINANCE · RESEARCH PROTOTYPE"
     values = metrics["Client portfolio"]
@@ -63,10 +68,13 @@ def create_html_report(path: Path, config: ResearchConfig, client: ClientConfig,
     captions = {
         "overview": "Net historical analytics use the configured fees and trading costs. Risk shares use the latest 252 return observations.",
         "diagnostics": "Daily risk metrics exclude the zero-duration initial purchase. Monthly return aggregation includes that cost.",
-        "attribution": "Exact dollar attribution; buy-and-sell gross turnover is reported without dividing by two.",
+        "attribution": "Exact monetary P&L attribution; buy-and-sell gross turnover is reported without dividing by two.",
         "planning": "Planning starts from the fictional client's current wealth, not historical terminal NAV. The histogram omits the upper 1% for readability; all paths enter calculations.",
         "scenarios": "The planning sensitivity uses common random shocks. Stress scenarios are assumed asset shocks, not historical crisis replays.",
     }
+    if manifest.get("saved_summary_only"):
+        captions["overview"] = "Captured Yahoo summary statistics; monetary amounts translated at the documented fixed rate. No daily wealth path was reconstructed."
+        captions["attribution"] = "Saved cumulative P&L and final capital weights, expressed in the reporting currency. The daily holdings history was not attached."
     titles = {"overview": "Portfolio review", "diagnostics": "Risk diagnostics", "attribution": "Attribution",
               "planning": "Client goals", "scenarios": "Sensitivity & stress"}
     sections = []
@@ -81,10 +89,11 @@ def create_html_report(path: Path, config: ResearchConfig, client: ClientConfig,
                         if findings_markdown else '')
     if findings_markdown:
         navigation += '<a href="#findings">Findings</a>'
-    one_off = ", ".join(f"month {m}: ${v:,.0f}" for m, v in sorted(client.one_off_spending.items())) or "none"
+    one_off = ", ".join(f"month {m}: {money(v)}" for m, v in sorted(client.one_off_spending.items())) or "none"
     disclosures = {
         "research_config": config.to_dict(), "client_assumptions": client.to_dict(),
         "data_quality": quality, "price_provenance": manifest, "risk_free": risk_free_metadata,
+        "currency": currency_metadata(config.currency),
     }
     html = f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -111,10 +120,11 @@ footer{{padding:24px;color:var(--muted);font-size:13px}}button{{background:var(-
 Strategic allocation, transparent risk, and illustrative spending scenarios in one reproducible review.</p></header>
 <main><nav>{navigation}<a href="#metrics">Metrics</a><a href="#assumptions">Assumptions</a></nav>
 <div class="cards">{card_html}</div>
-<section><h2>Client planning case</h2><p>Current investable wealth <b>${client.current_wealth:,.0f}</b>;
-annual spending <b>${client.annual_spending_today:,.0f}</b> in today's dollars;
-horizon <b>{client.horizon_years} years</b>; terminal legacy target <b>${client.legacy_goal_today:,.0f}</b> in today's dollars.</p>
-<p>Additional spending in today's dollars: {escape(one_off)}. Annual advisory fee: {config.advisory_fee_annual:.2%}.</p>
+<section><h2>Reporting currency</h2><p>{escape(currency_disclosure(config.currency))}</p></section>
+<section><h2>Client planning case</h2><p>Current investable wealth <b>{money(client.current_wealth)}</b>;
+annual spending <b>{money(client.annual_spending_today)}</b> in today's purchasing power;
+horizon <b>{client.horizon_years} years</b>; terminal legacy target <b>{money(client.legacy_goal_today)}</b> in today's purchasing power.</p>
+<p>Additional spending in today's purchasing power: {escape(one_off)}. Annual advisory fee: {config.advisory_fee_annual:.2%}.</p>
 <div class="planning-note"><b>{probability:.1%}</b> of modeled paths fund every planned payment and meet the terminal legacy target.
  Spending-only funding rate: <b>{projection.survival_probability:.1%}</b>.
 Monte Carlo standard error of the joint success estimate: {projection.success_mc_standard_error:.2%}.

@@ -36,7 +36,8 @@
       "SPY": 0.6,
       "AGG": 0.4
     },
-    "initial_capital": 1000000,
+    "currency": "AED",
+    "initial_capital": 3672500.0,
     "trading_cost_bps": 5,
     "advisory_fee_annual": 0.005,
     "rebalance": "monthly",
@@ -49,6 +50,53 @@
   },
   "client_assumptions": {
     "label": "Illustrative family mandate",
+    "currency": "AED",
+    "current_wealth": 7345000.0,
+    "annual_spending_today": 264420.0,
+    "horizon_years": 20,
+    "inflation": 0.025,
+    "expected_annual_return": 0.06,
+    "annual_volatility": 0.12,
+    "legacy_goal_today": 1836250.0,
+    "paths": 5000,
+    "seed": 2026,
+    "one_off_spending": {
+      "24": 918125.0
+    }
+  },
+  "source_research_config": {
+    "source": "yahoo",
+    "start": "2015-01-01",
+    "end": "2026-01-01",
+    "weights": {
+      "SPY": 0.28,
+      "VEA": 0.12,
+      "VWO": 0.08,
+      "AGG": 0.25,
+      "TIP": 0.1,
+      "GLD": 0.07,
+      "VNQ": 0.05,
+      "BIL": 0.05
+    },
+    "benchmark": {
+      "SPY": 0.6,
+      "AGG": 0.4
+    },
+    "currency": "USD",
+    "initial_capital": 1000000,
+    "trading_cost_bps": 5,
+    "advisory_fee_annual": 0.005,
+    "rebalance": "monthly",
+    "annual_risk_free_rate": 0.025,
+    "risk_free_source": "constant",
+    "periods_per_year": 252,
+    "min_observations": 253,
+    "max_calendar_gap_days": 7,
+    "seed": 42
+  },
+  "source_client_assumptions": {
+    "label": "Illustrative family mandate",
+    "currency": "USD",
     "current_wealth": 2000000,
     "annual_spending_today": 72000,
     "horizon_years": 20,
@@ -62,22 +110,37 @@
       "24": 250000
     }
   },
+  "currency": {
+    "reporting_currency": "AED",
+    "source_quote_currency": "USD",
+    "usd_aed_reporting_rate": 3.6725,
+    "rate_convention": "fixed reporting assumption; not a live execution quote",
+    "rate_source": "https://centralbank.ae/en/forex-eibor/exchange-rates/",
+    "rate_verified_date": "2026-11-04",
+    "note": "Amounts are in UAE dirhams (AED). The existing USD case is translated at a fixed reporting rate of 1 USD = AED 3.6725, verified against CBUAE on 2026-11-04. Yahoo ETF quotes remain USD source data; portfolio accounting applies their percentage returns to AED capital. A constant USD/AED rate is assumed throughout history and planning. FX spreads, conversion charges, and a change in the peg are not modeled."
+  },
+  "currency_translation": {
+    "source_currency": "USD",
+    "target_currency": "AED",
+    "factor": 3.6725,
+    "percentage_metrics_unchanged": true
+  },
   "precision": "Metrics/risk: saved four-decimal DataFrames; attribution/stress: saved six-decimal display; NAV supplemented from Colab metadata.",
   "daily_price_cache_included": false,
   "independent_new_yahoo_download_performed": false,
-  "limitation": "Raw daily prices and the original run ZIP were not attached. Historical charts and summaries are preserved, not reconstructed. Rerun the Yahoo-configured notebook to obtain full daily CSV exports.",
-  "attribution_reconciliation_residual_usd": 3.5999808460474014e-05,
+  "limitation": "Raw daily prices and the original run ZIP were not attached. Recorded summaries are currency-translated; monetary panels are redrawn from those summaries. The original dimensionless diagnostics panel is preserved. No missing daily paths are reconstructed. Rerun the Yahoo-configured notebook to obtain full daily CSV exports.",
+  "attribution_reconciliation_residual_aed": 0.0001322092965710908,
   "planning": {
     "success_frequency": 0.6568,
     "spending_funded_frequency": 0.8932,
     "simulation_recalculated_from_saved_assumptions": true
   },
   "figure_sha256": {
-    "01_portfolio_overview.png": "523d9d0c7a052147bba3d76f55bbf617dacdcf7a64eb97145223925366367180",
+    "01_portfolio_overview.png": "b445788254c59bef029666b4f00a229361efb9b60d3ee12278c27c3c0893ba4d",
     "02_risk_diagnostics.png": "1afe5fb429cde14b3ef1bc7e51fc604ea3627eace4a9d712a517122770e66cac",
-    "03_attribution_and_weights.png": "d2c73ef99174cd39274ea69c065dde280c211e44b35f8223b7148e8e8a386968",
-    "04_client_projection.png": "7564d834c2cd184d817feed546af7ef3953f9638e3c72a244bfa5c6e97b052c4",
-    "05_sensitivity_and_stress.png": "a05dddc2f588942ec88b2a327893256fe33f8d581ffa2bb3c12b3b052ce85239"
+    "03_attribution_and_weights.png": "f3b0f496667b0bd2b2f8f7462ee504436defaad9487c1327fa2de540b8b8bcd9",
+    "04_client_projection.png": "e72b78dec044125da4bfcab9c93ab07c8b08319756f5d82b7e74d3d798976ac4",
+    "05_sensitivity_and_stress.png": "a984cc9fa99f822d73f8d49f3522d6de83afd1987526dc7f8cd334749eb36cef"
   },
   "source_test_output": "st_one_off_spending_is_applied_once) ... ok\ntest_random_seed_is_reproducible (test_planning.PlanningTests.test_random_seed_is_reproducible) ... ok\ntest_real_wealth_deflates_nominal_balance (test_planning.PlanningTests.test_real_wealth_deflates_nominal_balance) ... ok\ntest_zero_return_cashflow_has_exact_solution (test_planning.PlanningTests.test_zero_return_cashflow_has_exact_solution) ... ok\ntest_zero_volatility_growth_matches_expected_annual_return (test_planning.PlanningTests.test_zero_volatility_growth_matches_expected_annual_return) ... ok\n\n----------------------------------------------------------------------\nRan 38 tests in 5.032s\n\nOK\n\n"
 }
