@@ -41,6 +41,14 @@ class DataTests(unittest.TestCase):
             with self.assertRaises(DataError):
                 load_prices(self.cfg, temp)
 
+    def test_demo_annualization_change_uses_a_distinct_snapshot(self):
+        with tempfile.TemporaryDirectory() as temp:
+            daily = load_prices(self.cfg, temp)
+            alternative = load_prices(replace(self.cfg, periods_per_year=365), temp)
+            self.assertFalse(alternative.manifest["cache_hit"])
+            self.assertEqual(len(list(Path(temp).glob("*.csv"))), 2)
+            self.assertFalse(np.allclose(daily.prices, alternative.prices))
+
     def test_source_names_do_not_share_cache(self):
         raw = pd.concat({"Adj Close": self.frame}, axis=1)
         fake_yf = types.SimpleNamespace(__version__="mock", download=lambda *a,**k: raw)
@@ -128,6 +136,22 @@ class DataTests(unittest.TestCase):
             rf, _ = risk_free_returns(dates, replace(self.cfg, risk_free_source="fred"), temp)
             self.assertAlmostEqual(rf.iloc[1], 1.04**(1/365.25)-1)
             self.assertAlmostEqual(rf.iloc[2], 1.08**(1/365.25)-1)
+
+    def test_fred_maximum_age_is_measured_from_the_trading_date(self):
+        payload = {"observations": [{"date": "2024-01-02", "value": "4"}]}
+        with tempfile.TemporaryDirectory() as temp:
+            for date, allowed in [("2024-01-09", True), ("2024-01-10", False)]:
+                dates = pd.to_datetime([date])
+                start = (dates[0] - pd.Timedelta(days=14)).date().isoformat()
+                key = sha256(f"fred-DGS3MO-{start}-{date}-v1".encode()).hexdigest()[:20]
+                stored = {"payload": payload, "retrieved_at_utc": "fixture",
+                    "sha256": sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()}
+                (Path(temp) / f"fred-{key}.json").write_text(json.dumps(stored))
+                if allowed:
+                    risk_free_returns(dates, replace(self.cfg, risk_free_source="fred"), temp)
+                else:
+                    with self.assertRaisesRegex(DataError, "Insufficient lagged FRED"):
+                        risk_free_returns(dates, replace(self.cfg, risk_free_source="fred"), temp)
 
 
 if __name__ == "__main__":

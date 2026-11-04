@@ -139,7 +139,7 @@
     "01_portfolio_overview.png": "b445788254c59bef029666b4f00a229361efb9b60d3ee12278c27c3c0893ba4d",
     "02_risk_diagnostics.png": "1afe5fb429cde14b3ef1bc7e51fc604ea3627eace4a9d712a517122770e66cac",
     "03_attribution_and_weights.png": "f3b0f496667b0bd2b2f8f7462ee504436defaad9487c1327fa2de540b8b8bcd9",
-    "04_client_projection.png": "e72b78dec044125da4bfcab9c93ab07c8b08319756f5d82b7e74d3d798976ac4",
+    "04_client_projection.png": "e1a48e978c9c9560c5d701e176dfb231329dc8cac3cb4d84f64945fffe9b6dbc",
     "05_sensitivity_and_stress.png": "a984cc9fa99f822d73f8d49f3522d6de83afd1987526dc7f8cd334749eb36cef"
   },
   "source_test_output": "st_one_off_spending_is_applied_once) ... ok\ntest_random_seed_is_reproducible (test_planning.PlanningTests.test_random_seed_is_reproducible) ... ok\ntest_real_wealth_deflates_nominal_balance (test_planning.PlanningTests.test_real_wealth_deflates_nominal_balance) ... ok\ntest_zero_return_cashflow_has_exact_solution (test_planning.PlanningTests.test_zero_return_cashflow_has_exact_solution) ... ok\ntest_zero_volatility_growth_matches_expected_annual_return (test_planning.PlanningTests.test_zero_volatility_growth_matches_expected_annual_return) ... ok\n\n----------------------------------------------------------------------\nRan 38 tests in 5.032s\n\nOK\n\n"

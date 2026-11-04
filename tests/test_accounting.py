@@ -88,6 +88,12 @@ class AccountingTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             run_backtest(prices, {"A": .5,"B": .5})
 
+    def test_risk_contributions_reject_nonfinite_weights(self):
+        returns = pd.DataFrame(np.random.default_rng(4).normal(0, .01, (40, 2)), columns=["A", "B"])
+        for value in (np.inf, -np.inf, np.nan):
+            with self.assertRaises(ValueError):
+                risk_contributions(returns, pd.Series({"A": value, "B": .4}))
+
 
 if __name__ == "__main__":
     unittest.main()

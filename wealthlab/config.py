@@ -97,7 +97,7 @@ class ClientConfig:
     horizon_years: int = 20
     inflation: float = 0.025
     expected_annual_return: float = 0.06
-    annual_volatility: float = 0.12
+    annual_volatility: float = 0.12  # Annualized log-return volatility in the scenario model.
     legacy_goal_today: float = 1_836_250.0
     paths: int = 5_000
     seed: int = 2026

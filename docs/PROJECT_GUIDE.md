@@ -201,14 +201,14 @@ make the report portable without a chart CDN or internet connection.
 
 Run offline unit tests and the notebook checker. Review saved charts. Publish
 the source, documentation, notebook, and correctly labeled Yahoo case bundle. Do not commit
-API keys or assume downloaded vendor data can be redistributed. The included
-GitHub Actions workflow is supplied for future repository execution; no external
-repository has been created or published by this deliverable.
+API keys or assume downloaded vendor data can be redistributed. The repository
+is published on GitHub, where the included Actions workflow checks Python 3.11
+and 3.12. Its scope is offline tests and isolated notebook execution.
 
 ## 8. Collection pipeline
 
 The price-cache key combines source, date range, ordered universe, adjustment
-policy, and demo-generator seed/version. A SHA-256 digest protects the actual CSV
+policy, and demo-generator seed/version and annualization setting. A SHA-256 digest protects the actual CSV
 bytes. Data is read back from the exact saved bytes on the first run so cached
 and uncached analyses receive identical numerical inputs.
 
@@ -278,7 +278,7 @@ Later daily returns are NAV_t / NAV_(t-1) - 1. The first row records initial
 deployment cost against starting capital. The product over every row equals
 ending NAV divided by initial capital.
 
-Dollar attribution is exactly additive:
+Monetary attribution is exactly additive:
 
 $$V_T-V_0=\sum_{t,i}H_{i,t-1}r_{i,t}-\sum_t TradingCost_t-\sum_t AdvisoryFee_t.$$
 
@@ -322,7 +322,7 @@ have less simulation noise. It is not an optimizer or a recommended allocation.
 |---|---|---|
 | Portfolio overview | Growth, drawdown, capital weights, risk shares | What happened and where risk sits |
 | Risk diagnostics | Rolling volatility, correlation, monthly heatmap, daily-return histogram | Stability, co-movement and historical tails |
-| Attribution | Dollar P&L by asset/cost and weight history | Reconciled performance and allocation drift |
+| Attribution | Monetary P&L by asset/cost and weight history | Reconciled performance and allocation drift |
 | Client projection | Real-wealth fan chart and terminal distribution | Outcomes under explicitly chosen assumptions |
 | Sensitivity and stress | Spending/return grid and three portfolio shocks | Dependence on assumptions and current exposure |
 
@@ -331,6 +331,13 @@ metric table, expandable assumptions/provenance, and print styling. It embeds
 all PNGs and opens offline. It is an explanatory report, not a live trading app.
 The notebook adds optional sliders for planning assumptions when ipywidgets is
 available. Those exploratory sliders do not silently overwrite the saved report.
+
+Fresh runs produce the full time-series panels above. Because the saved Yahoo
+case has no attached daily-price cache, its overview uses captured summary
+statistics and its attribution panel uses cumulative contributions and final
+weights. The original dimensionless diagnostics panel is retained. Monetary
+amounts are translated to AED; no daily history is reconstructed. The planning
+histogram omits the upper 1% for readability, while every path enters the results.
 
 ## 12. Performance metrics
 
@@ -366,6 +373,10 @@ The deliverables are the complete self-contained notebook, reusable Python
 package, tests, command-line entry point, dependency specifications, guide,
 Yahoo case dashboard, analytical summary tables, currency-labeled figures, assumptions, and
 checksummed run manifest. The notebook exports a ZIP of the specific run.
+That ZIP has an entry page linked to the actual generated report, current-run
+findings, and `config/current_run.json`. Its README distinguishes the current
+run from the original Yahoo case discussed in this guide. Download the maintained
+notebook separately from GitHub or Colab.
 
 Suggested resume wording after reproducing and understanding the project:
 

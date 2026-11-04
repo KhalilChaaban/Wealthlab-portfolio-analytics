@@ -54,6 +54,7 @@ def _request_spec(config: ResearchConfig) -> dict:
         "tickers": list(config.weights), "field": "adjusted_close_total_return_proxy",
         "demo_seed": config.seed if config.source == "demo" else None,
         "demo_generator": "factor-lognormal-v1" if config.source == "demo" else None,
+        "demo_periods_per_year": config.periods_per_year if config.source == "demo" else None,
     }
 
 
@@ -285,7 +286,9 @@ def risk_free_returns(dates: pd.DatetimeIndex, config: ResearchConfig,
         queries = pd.DataFrame({"date": dates - pd.Timedelta(days=1)})
         observed = observations[["date", "rate"]].rename(columns={"date": "observed_date"})
         matched = pd.merge_asof(queries, observed, left_on="date", right_on="observed_date",
-                                direction="backward", tolerance=pd.Timedelta(days=7))
+                                # Queries are already one day before the trading date:
+                                # six further days permit an actual maximum age of seven.
+                                direction="backward", tolerance=pd.Timedelta(days=6))
         if matched["rate"].isna().any():
             raise DataError("Insufficient lagged FRED yields; no rate fallback was substituted.")
         values = matched["rate"].to_numpy()

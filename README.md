@@ -55,8 +55,9 @@ place. Manual notebook replacement is unnecessary.
 
 The example translates the recorded Yahoo summary results into AED. Monetary
 charts are redrawn from those summaries, and the original dimensionless risk
-diagnostics panel is preserved. Summary tables inherit saved display precision. The raw daily-price cache was
-not attached; rerun the notebook for a fresh download and full daily CSV exports.
+diagnostics panel is preserved. Summary tables inherit saved display precision.
+The raw daily-price cache was not attached; rerun the notebook for a fresh
+download and full daily CSV exports.
 See [saved-case provenance](examples/yahoo/provenance.json).
 
 ## Findings from the Yahoo case
@@ -92,6 +93,10 @@ full discussion and limitations.
 4. Leave `SOURCE = "yahoo"` for real observations. Synthetic mode is available
    only as an explicit offline research/test option.
 5. Download `client_report.html` and the generated run bundle in the export cell.
+
+The run ZIP includes a working `START_HERE.html`, findings from that run, and
+`config/current_run.json` for reproduction. Its README identifies the run's actual
+source and reporting currency. The maintained notebook is downloaded separately.
 
 The notebook installs core dependencies only if missing. Yahoo mode also checks
 for its optional adapter. FRED requires your own `FRED_API_KEY`, preferably entered
@@ -165,6 +170,8 @@ flowchart TD
 | `wealthlab/report.py` | Embedded HTML report and safe JSON serialization |
 | `wealthlab/findings.py` | Source-aware findings generated from actual run metrics |
 | `wealthlab/pipeline.py` | Reproducible workflow and exports |
+| `wealthlab/export.py` | Run-specific ZIP, entry page, findings, and reproduction configuration |
+| `wealthlab/currency.py` | Reporting units, fixed-rate translation, and FX provenance |
 | `wealthlab/__main__.py` | Command-line interface |
 | `tests/` | Offline accounting, data-contract, and planning tests |
 | `tools/` | Notebook generation and execution checks |
@@ -199,7 +206,7 @@ risk measures are unchanged. See [currency conventions](docs/CURRENCY.md).
 | Annual spending | AED 264,420 in today's purchasing power |
 | Additional goal | AED 918,125 in today's purchasing power at simulation month 24 |
 | Planning horizon / legacy goal | 20 years / AED 1,836,250 in today's purchasing power |
-| Planning return / volatility / inflation | 6% expected annual nominal simple return / 12% / 2.5% |
+| Planning return / volatility / inflation | 6% expected annual nominal simple return / 12% annualized log-return volatility / 2.5% |
 | Simulation | 5,000 paths; reproducible seed; no automatic historical calibration |
 
 Change these assumptions in the notebook or `config/yahoo.json`. Local JSON use:
@@ -214,11 +221,18 @@ Run `python -m unittest discover -s tests -v` and `python tools/check_notebook.p
 The latter executes every plain-Python notebook code cell in a fresh temporary
 directory. It is not a Jupyter-kernel or Colab-browser integration test.
 
-The uploaded Colab notebook contains a successful Yahoo run and 38 passing
-tests. The finalization environment cannot make a new Yahoo download. The saved
-Yahoo summaries were translated into AED, monetary charts were redrawn from
-those summaries, and updated code was tested independently offline. FRED was not used in
-the saved case. See [validation details](docs/VALIDATION.md).
+The original user-run Yahoo notebook recorded 38 passing tests. The current
+suite has **50 offline tests**, and all **24 notebook code cells** are checked
+in a fresh temporary workspace. The checker also verifies embedded source and
+support-file consistency, ZIP integrity, exported start-page links, and agreement
+between the exported assumptions and findings. GitHub Actions runs these checks
+on Python 3.11 and 3.12.
+
+The saved Yahoo summaries were translated into AED, and monetary charts were
+redrawn from those summaries. The original daily-price cache was not attached,
+so its complete historical calculations cannot be independently repeated from
+the saved summaries alone. No fresh Yahoo download was performed during this
+review. FRED was not used in the saved case. See [validation details](docs/VALIDATION.md).
 
 No taxes, suitability determination, lending, estate planning, whole-share lots,
 broker execution, point-in-time security selection, or exchange-calendar

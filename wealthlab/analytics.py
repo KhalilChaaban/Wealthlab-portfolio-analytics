@@ -97,7 +97,7 @@ def risk_contributions(asset_returns: pd.DataFrame, weights: pd.Series,
     if len(sample) < 30:
         raise ValueError("Risk decomposition needs at least 30 observations.")
     w = weights.reindex(sample.columns)
-    if w.isna().any() or not np.isfinite(sample.to_numpy()).all():
+    if not np.isfinite(w.to_numpy()).all() or not np.isfinite(sample.to_numpy()).all():
         raise ValueError("Risk data or weights are invalid.")
     covariance = sample.cov().to_numpy() * periods_per_year
     vector = w.to_numpy()

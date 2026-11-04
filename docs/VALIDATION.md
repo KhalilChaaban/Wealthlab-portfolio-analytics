@@ -46,13 +46,14 @@ Run the Yahoo-configured notebook to retrieve fresh prices and full daily CSVs.
 Client planning was independently recalculated from its saved assumptions.
 
 Updated reporting includes automatically generated findings. Two additional
-tests cover source-aware wording and safe HTML rendering. The previous finalization suite contained 40 passing tests. All 24 current code cells passed the isolated
+tests cover source-aware wording and safe HTML rendering. That finalization
+suite contained 40 passing tests. All 24 code cells passed the isolated
 computational notebook check with an explicit demo override; that check does
 not replace or relabel the preserved Yahoo case.
 
 ## AED reporting update
 
-The current suite has **47 passing offline tests**, including seven currency
+The AED update introduced **47 passing offline tests**, including seven currency
 tests. These verify fixed-rate translation, the converted default case, matching
 USD/AED percentage returns and weights, scaled P&L and costs, unchanged planning
 goal frequencies under the same shocks, currency validation, and rejection of
@@ -67,6 +68,30 @@ missing daily history is inferred. The original dimensionless diagnostics panel
 is retained. The updated notebook is checked separately in explicit offline
 demo mode, which does not replace its saved Yahoo case.
 
+## Final review — 2026-11-04
+
+The current suite has **50 passing offline tests**. Three new regression checks
+cover demo-cache identity when its annualization changes and rejection of
+nonfinite risk weights, plus the optional FRED proxy's seven-day maximum age
+measured from the actual trading date. The findings test also verifies that optional FRED
+mode is described as a lagged yield proxy rather than a constant risk-free rate.
+
+The export integration check opens the actual ZIP, checks its integrity and
+unique entries, resolves its start-page links, and verifies that root findings
+and `config/current_run.json` belong to the completed run. Live raw-data caches
+remain excluded. The notebook checker verifies that all embedded modules and
+support files match the maintained repository, then runs all 24 code cells in
+explicit demo mode and inspects the exported archive.
+
+The saved AED case is checked against the original recorded USD summaries:
+monetary values scale once by 3.6725, dimensionless metrics retain their recorded
+values, investment contributions minus costs reconcile with ending wealth to
+within AED 0.01, and source checksums are retained. Planning tables are checked
+against the translated assumptions. Saved figures are visually reviewed, and
+the terminal histogram is labeled as the lower 99%, matching the omitted upper
+1%. Scenario volatility is explicitly identified as annualized log-return
+volatility. These presentation changes do not alter the recorded case results.
+
 ## What these checks do not establish
 
 The notebook was computationally executed as ordinary Python, not in an actual
@@ -75,9 +100,10 @@ executed in the artifact-building environment. Their schema and failure
 contracts were tested offline; current provider access, credentials, licensing,
 and optional widget behavior still need a user-side smoke test.
 
-No live client, brokerage integration, suitability review, tax calculation,
-regulatory validation, or external GitHub deployment occurred. GitHub Actions
-configuration is included but has not run on a remote repository.
+No live client use, brokerage integration, suitability review, tax calculation,
+or regulatory validation is claimed. The source repository is published on
+GitHub, and Actions runs the offline suite and notebook check on Python 3.11
+and 3.12. This is not a deployment to a live advisory or trading system.
 
 ## Reproduce
 

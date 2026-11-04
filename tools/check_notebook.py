@@ -6,8 +6,11 @@ It deliberately does not claim a Colab-browser or Jupyter-kernel integration tes
 
 from base64 import b64encode
 from contextlib import redirect_stdout, redirect_stderr
+from html.parser import HTMLParser
 from pathlib import Path
+from zipfile import ZipFile
 import argparse
+import ast
 import io
 import json
 import os
@@ -18,6 +21,41 @@ import tempfile
 import time
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def check_embedded_sources(notebook_path: Path) -> None:
+    """Fail if maintained modules or embedded support files drift from the notebook."""
+    notebook = json.loads(notebook_path.read_text(encoding="utf-8"))
+    checked = set()
+    supplemental_count = 0
+    extras = {"config.py": "currency.py", "report.py": "findings.py", "pipeline.py": "export.py"}
+    for cell in notebook["cells"]:
+        if cell["cell_type"] != "code":
+            continue
+        source = "".join(cell["source"])
+        module = re.match(r"# CELL \d+ \| Build (\w+\.py)", source)
+        statements = ast.parse(source).body
+        assignments = {stmt.targets[0].id: stmt.value for stmt in statements
+                       if isinstance(stmt, ast.Assign) and isinstance(stmt.targets[0], ast.Name)}
+        if module:
+            name = module.group(1)
+            for filename, variable in [(name, "module_source"),
+                    *([(extras[name], "findings_source")] if name in extras else [])]:
+                maintained = (ROOT / "wealthlab" / filename).read_text(encoding="utf-8")
+                if ast.literal_eval(assignments[variable]) != maintained:
+                    raise AssertionError(f"Embedded source is stale: wealthlab/{filename}")
+                checked.add(filename)
+        if source.startswith("# CELL 20"):
+            mapping = json.loads(ast.literal_eval(assignments["supplemental"].args[0]))
+            for filename, content in mapping.items():
+                if (ROOT / filename).read_text(encoding="utf-8") != content:
+                    raise AssertionError(f"Embedded support file is stale: {filename}")
+            supplemental_count = len(mapping)
+    if checked != {file.name for file in (ROOT / "wealthlab").glob("*.py")}:
+        raise AssertionError("The notebook does not embed every maintained package module.")
+    if not supplemental_count:
+        raise AssertionError("No embedded support files were checked.")
+    print(f"PASS: {len(checked)} embedded modules and {supplemental_count} support files match the repository.")
 
 
 def worker(notebook_path: Path, output_path: Path, workspace: Path) -> None:
@@ -68,6 +106,26 @@ def worker(notebook_path: Path, output_path: Path, workspace: Path) -> None:
     report = scope["RUN"].report_path
     if not report.is_file() or not scope["EXPORT_PATH"].is_file():
         raise AssertionError("Notebook did not create its report and export bundle.")
+    class EntryLinks(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.targets = []
+        def handle_starttag(self, tag, attrs):
+            if tag == "a":
+                self.targets.extend(value for key, value in attrs if key == "href")
+    with ZipFile(scope["EXPORT_PATH"]) as archive:
+        if archive.testzip() or len(archive.namelist()) != len(set(archive.namelist())):
+            raise AssertionError("The exported ZIP is corrupt or contains duplicate entries.")
+        links = EntryLinks()
+        links.feed(archive.read("START_HERE.html").decode())
+        if len(links.targets) != 2 or any(target not in archive.namelist() for target in links.targets):
+            raise AssertionError("The exported start page has a broken local link.")
+        if archive.read("FINDINGS.md") != (scope["RUN"].output_dir / "FINDINGS.md").read_bytes():
+            raise AssertionError("Root exported findings do not match this run.")
+        assumptions = json.loads(archive.read("config/current_run.json"))
+        if assumptions["research"]["source"] != scope["CONFIG"].source:
+            raise AssertionError("The exported source label is stale.")
+    print("PASS: exported ZIP integrity, start-page links, current findings, and assumptions.")
     # Strip ephemeral machine paths from captured text; keep figures and calculations.
     serialized = json.dumps(notebook, ensure_ascii=False, indent=1)
     serialized = serialized.replace(str(workspace), "<notebook-workspace>")
@@ -88,6 +146,7 @@ def main():
         worker(*(Path(arg) for arg in args.worker))
         return
     started = time.monotonic()
+    check_embedded_sources(ROOT / "WealthLab_Colab.ipynb")
     with tempfile.TemporaryDirectory(prefix="wealthlab-notebook-") as temp:
         temporary = Path(temp)
         target = args.write_executed.resolve() if args.write_executed else temporary / "executed.ipynb"

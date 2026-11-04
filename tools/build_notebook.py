@@ -108,7 +108,8 @@ def main():
                           + f"module_source = '''{literal}'''\n" \
                           + f"(PROJECT_ROOT / 'wealthlab' / '{name}').write_text(module_source, encoding='utf-8')\n" \
                           + f"print('Created wealthlab/{name}')"
-        for extra_name in ({"config.py": ["currency.py"], "report.py": ["findings.py"]}.get(name, [])):
+        for extra_name in ({"config.py": ["currency.py"], "report.py": ["findings.py"],
+                            "pipeline.py": ["export.py"]}.get(name, [])):
             findings_source = (ROOT / "wealthlab" / extra_name).read_text()
             findings_literal = findings_source.replace("\\", "\\\\").replace("'''", "\\'\\'\\'")
             module_cell += (f"\nfindings_source = '''{findings_literal}'''\n"
@@ -276,8 +277,8 @@ def main():
     '''), markdown('''
         ## Cell 18 — Review the saved figures
 
-        Each historical chart identifies its source. The terminal-wealth histogram displays
-        the central 99% for readability; all paths enter calculations.
+        Each historical chart identifies its source. The terminal-wealth histogram omits
+        the upper 1% for readability; all paths enter calculations.
     '''), code('''
         # CELL 18 | Display charts
         for label, chart_path in RUN.chart_paths.items():
@@ -367,22 +368,15 @@ def main():
         ## Cell 22 — Export and download
 
         The ZIP contains the generated run, emitted Python package, documentation, and tests.
+        Its start page and root findings describe this run, and config/current_run.json
+        retains the exact assumptions. The maintained notebook is a separate download.
         Live raw-data caches and credentials are excluded. Check provider rights before
         redistributing outputs derived from downloaded market data.
         Set DOWNLOAD_FILES=True to invoke Colab's browser downloads.
     '''), code('''
         # CELL 22 | Export artifacts
-        from zipfile import ZipFile, ZIP_DEFLATED
-        EXPORT_PATH = PROJECT_ROOT / "WealthLab_Run.zip"
-        with ZipFile(EXPORT_PATH, "w", ZIP_DEFLATED) as archive:
-            for folder in [RUN.output_dir, PROJECT_ROOT / "wealthlab", PROJECT_ROOT / "tests",
-                           PROJECT_ROOT / "docs", PROJECT_ROOT / "tools", PROJECT_ROOT / "config", PROJECT_ROOT / ".github"]:
-                for file_path in sorted(folder.rglob("*")):
-                    if file_path.is_file() and "__pycache__" not in file_path.parts:
-                        archive.write(file_path, file_path.relative_to(PROJECT_ROOT))
-            for name in ["README.md", "FINDINGS.md", "START_HERE.html", "LICENSE", "pyproject.toml", ".gitignore", "requirements.txt",
-                         "requirements-live.txt", "requirements-tested.txt", "requirements-colab.txt"]:
-                archive.write(PROJECT_ROOT / name, name)
+        from wealthlab.export import export_run
+        EXPORT_PATH = export_run(RUN, CONFIG, CLIENT, PROJECT_ROOT)
         print("Complete export:", EXPORT_PATH)
         print("Offline dashboard:", RUN.report_path)
         DOWNLOAD_FILES = False

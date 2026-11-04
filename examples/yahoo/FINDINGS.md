@@ -46,9 +46,9 @@ These are assumed asset-price shocks. They are not reconstructions of actual cri
 
 ### What the client planning model showed
 
-The planning exercise was separate from the historical backtest. It started with **AED 7,345,000**, annual spending of **AED 264,420**, additional spending of **AED 918,125 in month 24**, and a **AED 1,836,250 terminal legacy target after 20 years**. Spending and goals were expressed in today's purchasing power.
+The planning exercise was separate from the historical backtest. It started with **AED 7,345,000**, annual spending of **AED 264,420**, additional spending of **AED 918,125 in month 24**, and a terminal legacy target of **AED 1,836,250 after 20 years**. Spending and goals were expressed in today's purchasing power.
 
-The model used **6% expected annual nominal return before advisory fees, 12% volatility, and 2.5% inflation**, across **5,000 simulated paths**. These forward assumptions were set explicitly; they were not automatically inferred from historical returns.
+The model used **6% expected annual nominal return before advisory fees, 12% annualized log-return volatility, and 2.5% inflation**, across **5,000 simulated paths**. These forward assumptions were set explicitly; they were not automatically inferred from historical returns.
 
 - **89.32%** of paths covered every planned spending payment.
 - **65.68%** covered every payment and also reached the legacy target.

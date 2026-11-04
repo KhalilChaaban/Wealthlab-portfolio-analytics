@@ -60,6 +60,11 @@ def build_findings(config: ResearchConfig, client: ClientConfig, metrics: pd.Dat
     spending = min(sensitivity.index, key=lambda value: abs(float(value)-client.annual_spending_today))
     low_success = float(sensitivity.loc[spending, low_return])
     one_off = "; ".join(f"{money(value)} in month {month}" for month, value in sorted(client.one_off_spending.items())) or "none"
+    risk_free_note = (
+        "The Sharpe ratio used a lagged FRED DGS3MO yield proxy. Yields are treated as effective annual rates with calendar-day accrual; this is an approximation, not an investable cash-return series or a vintage-perfect reconstruction."
+        if config.risk_free_source == "fred" else
+        f"The Sharpe ratio used an explicit **{config.annual_risk_free_rate:.2%} annual risk-free assumption** in this case. It is a comparison assumption, not an observed cash-investment return series."
+    )
     text = f"""
 ## Findings and Conclusions
 
@@ -79,7 +84,7 @@ The historical analysis used {source}, covering **{quality['first_observation']}
 
 The portfolio finished at approximately **{money(portfolio[ending_key])}**, compared with **{money(benchmark[ending_key])}** for the benchmark. {comparison}
 
-The Sharpe ratio used an explicit **{config.annual_risk_free_rate:.2%} annual risk-free assumption** in this case. It is a comparison assumption, not an observed cash-investment return series.
+{risk_free_note}
 
 Fees also added up. The portfolio paid approximately **{money(portfolio[fee_key])} in advisory fees** and **{money(portfolio[cost_key])} in trading costs**. These direct deductions are different from the full terminal-wealth effect, which also reflects compounding.
 
@@ -101,9 +106,9 @@ These are assumed asset-price shocks. They are not reconstructions of actual cri
 
 ### What the client planning model showed
 
-The planning exercise was separate from the historical backtest. It started with **{money(client.current_wealth)}**, annual spending of **{money(client.annual_spending_today)}**, additional spending of **{one_off}**, and a **{money(client.legacy_goal_today)} terminal legacy target after {client.horizon_years} years**. Spending and goals were expressed in today's purchasing power.
+The planning exercise was separate from the historical backtest. It started with **{money(client.current_wealth)}**, annual spending of **{money(client.annual_spending_today)}**, additional spending of **{one_off}**, and a terminal legacy target of **{money(client.legacy_goal_today)} after {client.horizon_years} years**. Spending and goals were expressed in today's purchasing power.
 
-The model used **{client.expected_annual_return:.0%} expected annual nominal return before advisory fees, {client.annual_volatility:.0%} volatility, and {client.inflation:.1%} inflation**, across **{client.paths:,} simulated paths**. These forward assumptions were set explicitly; they were not automatically inferred from historical returns.
+The model used **{client.expected_annual_return:.0%} expected annual nominal return before advisory fees, {client.annual_volatility:.0%} annualized log-return volatility, and {client.inflation:.1%} inflation**, across **{client.paths:,} simulated paths**. These forward assumptions were set explicitly; they were not automatically inferred from historical returns.
 
 - **{projection.survival_probability:.2%}** of paths covered every planned spending payment.
 - **{projection.success_probability:.2%}** covered every payment and also reached the legacy target.

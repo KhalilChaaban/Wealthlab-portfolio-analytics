@@ -40,3 +40,6 @@ class FindingsTests(unittest.TestCase):
         self.assertNotIn('synthetic demonstration',yahoo)
         self.assertIn('earned a higher annualized return',yahoo)
         self.assertIn('8.00%',yahoo)
+        fred = build_findings(replace(cfg, source='yahoo', risk_free_source='fred'), *arguments)
+        self.assertIn('lagged FRED DGS3MO yield proxy', fred)
+        self.assertNotIn('explicit **2.50% annual risk-free assumption**', fred)

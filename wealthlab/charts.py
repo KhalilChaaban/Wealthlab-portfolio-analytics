@@ -194,10 +194,10 @@ def create_planning_charts(projection: ProjectionResult, sensitivity: pd.DataFra
     ax.axvline(client.legacy_goal_today, color=GOLD, linestyle="--")
     ax.xaxis.set_major_formatter(FuncFormatter(money))
     ax.tick_params(axis="x", labelrotation=25)
-    ax.set(title="Terminal wealth · central 99%", xlabel=f"Today's {currency}", ylabel="Simulated paths")
+    ax.set(title="Terminal wealth · lower 99%", xlabel=f"Today's {currency}", ylabel="Simulated paths")
     ax.xaxis.set_major_locator(MaxNLocator(5))
     paths["planning"] = _finish(fig, "WEALTHLAB / Goals and spending",
-        f"Explicit assumptions: return {client.expected_annual_return:.1%}, volatility {client.annual_volatility:.1%}, "
+        f"Assumptions: return {client.expected_annual_return:.1%}, log-return volatility {client.annual_volatility:.1%}, "
         f"inflation {client.inflation:.1%} · {client.paths:,} simulated paths",
         "ILLUSTRATIVE MODEL SCENARIOS — NOT FORECASTS OR GUARANTEES", output / "04_client_projection.png")
 
